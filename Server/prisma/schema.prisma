@@ -14,11 +14,21 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid()) @map("_id") @db.ObjectId
-  email     String   @unique
-  name      String?
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  username         String?  @unique @map("username") @db.String
+  name             String
+  email            String   @unique
+  password         String   @default("") @map("password") @db.String
+  image            String   @default("")
+  followers        String[] @default([])
+  following        String[] @default([])
+  bio              String   @default("")
+  totalImagesSold  Int      @default(0)
+  totalEarnings    Int      @default(0)
+  isLive           Boolean  @default(false)
+  walletIsActive   Boolean  @default(false)
+  emailVerified    Boolean  @default(false)
+  identityVerified Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
-
