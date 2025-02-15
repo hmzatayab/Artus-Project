@@ -1,8 +1,8 @@
 import prisma from "../config/DB";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
-// User input interface
 interface CreateUserInput {
   username: string;
   email: string;
@@ -15,7 +15,6 @@ interface LoginUserInput {
   password: string;
 }
 
-// User create service
 export const createUser = async ({
   username,
   email,
@@ -26,21 +25,16 @@ export const createUser = async ({
     throw new Error("All files are required");
   }
 
-  const emailExists = await prisma.user.findUnique({
-    where: { email },
-  });
-  if (emailExists) {
-    throw new Error("User with this email already exists");
-  }
+  const [emailExists, usernameExists] = await Promise.all([
+    prisma.user.findUnique({ where: { email } }),
+    prisma.user.findUnique({ where: { username } }),
+  ]);
 
-  const existingUsername = await prisma.user.findUnique({
-    where: { username },
-  });
-  if (existingUsername) {
-    throw new Error("Username already taken");
-  }
+  if (emailExists) throw new Error("Email already in use");
+  if (usernameExists) throw new Error("Username already taken");
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, 12);
+  const emailVerificationToken = crypto.randomBytes(32).toString("hex");
 
   const user = await prisma.user.create({
     data: {
@@ -48,29 +42,33 @@ export const createUser = async ({
       email,
       name,
       password: hashedPassword,
+      emailVerificationToken,
     },
   });
+
+  const verificationLink = `http://localhost:3000/user//verify-email?token=${emailVerificationToken}`;
+
+  // Placeholder for sending email
+  console.log(`Verify your email by clicking here: ${verificationLink}`);
 
   return user;
 };
 
-export const loginUser = async ({ email, password }: LoginUserInput) => {
+export const loginUser = async ({ 
+  email, password 
+}: LoginUserInput) => {
   if (!email || !password) {
     throw new Error("All fields are required");
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) {
-    throw new Error("Invalid credentials");
-  }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
+  if (!user || !(await bcrypt.compare(password, user.password))) {
     throw new Error("Invalid credentials");
   }
 
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
     expiresIn: "7d",
+    algorithm: "HS512",
   });
 
   const { password: _, ...userWithoutPassword } = user;
