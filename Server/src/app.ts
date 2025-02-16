@@ -6,6 +6,7 @@ import { locationMiddleware } from "./Middleware/locationMiddleware";
 // Route configuration
 import userRoute from "./Routers/user.routes";
 import postRoute from "./Routers/post.routes";
+import commentRoute from "./Routers/comment.routes";
 
 const app = express();
 
@@ -22,5 +23,6 @@ app.get("/", (req, res) => {
 // Endpoint's
 app.use("/user", userRoute);
 app.use("/post", postRoute);
+app.use("/comment", commentRoute);
 
 export default app;
