@@ -5,6 +5,7 @@ import { locationMiddleware } from "./Middleware/locationMiddleware";
 
 // Route configuration
 import userRoute from "./Routers/user.routes";
+import postRoute from "./Routers/post.routes";
 
 const app = express();
 
@@ -18,7 +19,8 @@ app.get("/", (req, res) => {
   res.send("Welcome to Artus!");
 });
 
-// User Endpoint's
+// Endpoint's
 app.use("/user", userRoute);
+app.use("/post", postRoute);
 
 export default app;
