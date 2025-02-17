@@ -43,6 +43,14 @@ export const createUser = async ({
       name,
       password: hashedPassword,
       emailVerificationToken,
+      walletIsActive: true,
+    },
+  });
+
+  await prisma.wallet.create({
+    data: {
+      userId: user.id,
+      balance: 0,
     },
   });
 
@@ -54,9 +62,7 @@ export const createUser = async ({
   return user;
 };
 
-export const loginUser = async ({ 
-  email, password 
-}: LoginUserInput) => {
+export const loginUser = async ({ email, password }: LoginUserInput) => {
   if (!email || !password) {
     throw new Error("All fields are required");
   }
