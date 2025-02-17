@@ -35,22 +35,27 @@ export const createUser = async ({
 
   const hashedPassword = await bcrypt.hash(password, 12);
   const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+  const userIDGen = parseInt(crypto.randomBytes(4).toString('hex'), 16).toString().slice(0, 8);
 
   const user = await prisma.user.create({
     data: {
       username,
       email,
       name,
+      userId: userIDGen,
       password: hashedPassword,
       emailVerificationToken,
       walletIsActive: true,
     },
   });
 
+  const walletId = Math.floor(10000000 + Math.random() * 90000000).toString();
+
   await prisma.wallet.create({
     data: {
       userId: user.id,
       balance: 0,
+      walletId,
     },
   });
 
@@ -63,6 +68,7 @@ export const createUser = async ({
 };
 
 export const loginUser = async ({ email, password }: LoginUserInput) => {
+  
   if (!email || !password) {
     throw new Error("All fields are required");
   }
@@ -72,6 +78,10 @@ export const loginUser = async ({ email, password }: LoginUserInput) => {
     throw new Error("Invalid credentials");
   }
 
+  if (!user || !user.userId) {
+    throw new Error("User or userId not found");
+  }
+  
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
     expiresIn: "7d",
     algorithm: "HS512",

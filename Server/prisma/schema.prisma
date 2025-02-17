@@ -14,33 +14,39 @@ datasource db {
 }
 
 model User {
-  id                     String   @id @default(auto()) @map("_id") @db.ObjectId
-  username               String?  @unique @map("username") @db.String
-  name                   String
-  email                  String   @unique
-  password               String   @default("") @map("password") @db.String
-  isEmailVerified        Boolean  @default(false)
-  emailVerificationToken String?
-  ipAddress              String?  @default("")
-  country                String?  @default("")
-  city                   String?  @default("")
-  image                  String   @default("")
-  followers              String[] @default([]) @db.ObjectId
-  following              String[] @default([]) @db.ObjectId
-  bio                    String   @default("")
-  totalImagesSold        Int      @default(0)
-  totalEarnings          Int      @default(0)
-  isLive                 Boolean  @default(false)
-  walletIsActive         Boolean  @default(false)
-  emailVerified          Boolean  @default(false)
-  wallet                 Wallet?
-  identityVerified       Boolean  @default(false)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  id                       String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId                   String    @unique
+  username                 String?   @unique @map("username") @db.String
+  name                     String
+  email                    String    @unique
+  password                 String    @default("") @map("password") @db.String
+  isEmailVerified          Boolean   @default(false)
+  emailVerificationToken   String?
+  ipAddress                String?   @default("")
+  country                  String?   @default("")
+  city                     String?   @default("")
+  image                    String    @default("")
+  followers                String[]  @default([]) @db.ObjectId
+  following                String[]  @default([]) @db.ObjectId
+  bio                      String    @default("")
+  totalImagesSold          Int       @default(0)
+  totalEarnings            Int       @default(0)
+  isLive                   Boolean   @default(false)
+  walletIsActive           Boolean   @default(false)
+  emailVerified            Boolean   @default(false)
+  isBlocked                Boolean   @default(false)
+  wallet                   Wallet?
+  passwordResetToken       String?   @db.String
+  passwordResetTokenExpiry DateTime?
+  identityVerified         Boolean   @default(false)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
 
-  posts    Post[]
-  comments Comment[]
-  replies  Reply[]
+  posts                 Post[]
+  comments              Comment[]
+  replies               Reply[]
+  receivedNotifications Notification[] @relation(name: "ReceiverNotifications")
+  sentNotifications     Notification[] @relation(name: "SenderNotifications")
 }
 
 model Post {
@@ -91,26 +97,49 @@ model Reply {
 }
 
 model Wallet {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @unique @db.ObjectId
-  balance   Float    @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId                    String    @unique @db.ObjectId
+  balance                   Float     @default(0)
+  walletId                  String    @unique
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+  failedTransactionCount    Float     @default(0)
+  lastFailedTransactionTime DateTime?
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 }
 
 model Transaction {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  walletId      String   @db.ObjectId
+  type          String // 'deposit', 'withdraw', 'transfer'
+  amount        Float
+  transactionId String   @unique
+  invoiceId     String   @unique
+  fromUserId    String?  @db.ObjectId
+  toUserId      String?  @db.ObjectId
+  status        String // 'success', 'failed', 'pending'
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  walletId   String   @db.ObjectId
-  type       String // 'deposit', 'withdraw', 'transfer'
-  amount     Float
-  fromUserId String?  @db.ObjectId
-  toUserId   String?  @db.ObjectId
-  status     String // 'success', 'failed', 'pending'
+  receiverId String   @db.ObjectId
+  senderId   String   @db.ObjectId
+  type       String // message, follow, like, comment, etc.
+  message    String
+  link       String?
+  isRead     Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  receiver User @relation(name: "ReceiverNotifications", fields: [receiverId], references: [id])
+  sender   User @relation(name: "SenderNotifications", fields: [senderId], references: [id])
+
+  @@index([receiverId])
+  @@index([senderId])
 }

@@ -23,7 +23,7 @@ export const userLogin = async (req: Request, res: Response) => {
       httpOnly: true,
       sameSite: "strict",
     });
-    res.status(200).json({ user, token });
+    res.status(200).json({ token, user });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
