@@ -49,6 +49,25 @@ model User {
   sentNotifications     Notification[] @relation(name: "SenderNotifications")
 }
 
+model Admin {
+  id                       String    @id @default(auto()) @map("_id") @db.ObjectId
+  adminId                  String    @unique
+  passcode                 String
+  name                     String
+  email                    String    @unique
+  password                 String    @default("") @map("password") @db.String
+  image                    String    @default("")
+  isEmailVerified          Boolean   @default(false)
+  emailVerificationToken   String?
+  walletIsActive           Boolean   @default(false)
+  role                     String    @default("Editor")
+  isBlocked                Boolean   @default(false)
+  passwordResetToken       String?   @db.String
+  passwordResetTokenExpiry DateTime?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+}
+
 model Post {
   id                   String   @id @default(auto()) @map("_id") @db.ObjectId
   userId               String   @db.ObjectId

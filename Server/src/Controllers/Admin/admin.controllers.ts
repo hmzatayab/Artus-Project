@@ -1,14 +1,14 @@
 import { Request, Response, RequestHandler } from "express";
-import prisma from "../config/DB";
-import { createUser, loginUser, requestPasswordResetService, resetPasswordService } from "../Services/user.services";
+import prisma from "../../config/DB";
+import * as adminService from "../../Services/Admin/admin.services";
 
-export const userRegister = async (req: Request, res: Response) => {
+export const adminRegister = async (req: Request, res: Response) => {
   try {
-    const user = await createUser(req.body);
+    const admin = await adminService.createAdmin(req.body);
 
     res.status(201).json({
-      message: "User registered successfully",
-      ...(user as any)._doc,
+      message: "Admin registered successfully",
+      ...(admin as any)._doc,
       password: null,
     });
   } catch (error: any) {
@@ -16,22 +16,22 @@ export const userRegister = async (req: Request, res: Response) => {
   }
 };
 
-export const userLogin = async (req: Request, res: Response) => {
+export const adminLogin = async (req: Request, res: Response) => {
   try {
-    const { user, token } = await loginUser(req.body);
-    res.cookie("token", token, {
+    const { admin, adminToken } = await adminService.loginUser(req.body);
+    res.cookie("adminToken", adminToken, {
       httpOnly: true,
       sameSite: "strict",
     });
-    res.status(200).json({ token, user });
+    res.status(200).json({ adminToken, admin });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
 
-export const userLogout = async (req: Request, res: Response) => {
+export const adminLogout = async (req: Request, res: Response) => {
   try {
-    res.clearCookie("token", {
+    res.clearCookie("adminToken", {
       httpOnly: true,
       sameSite: "strict",
     });
@@ -43,20 +43,20 @@ export const userLogout = async (req: Request, res: Response) => {
 };
 
 export const emailVerify: RequestHandler = async (req, res) => {
-  const { token } = req.query;
+  const { adminToken } = req.query;
 
   try {
-    const user = await prisma.user.findFirst({
-      where: { emailVerificationToken: token as string },
+    const admin = await prisma.admin.findFirst({
+      where: { emailVerificationToken: adminToken as string },
     });
 
-    if (!user) {
+    if (!admin) {
       res.status(400).json({ message: "Invalid or expired token" });
       return;
     }
 
     await prisma.user.update({
-      where: { id: user.id },
+      where: { id: admin.id },
       data: { isEmailVerified: true, emailVerificationToken: null },
     });
 
@@ -71,21 +71,23 @@ export const requestPasswordResetController = async (
   req: Request,
   res: Response
 ) => {
-  const { email } = req.body;
+  const { email, passcode } = req.body;
 
-  if (!email) {
-    res.status(400).json({ error: "Email is required" });
-    return 
+  if (!email || !passcode) {
+    res.status(400).json({ error: "Email and passcode are required" });
+    return;
   }
 
   try {
     // Call service to request password reset
-    await requestPasswordResetService(email);
+    await adminService.requestPasswordResetService(email, passcode);
     res.status(200).json({ message: "Password reset link sent to email" });
-    return
+    return;
   } catch (error) {
+    console.log(error);
+    
     res.status(500).json({ error: "Internal server error" });
-    return 
+    return;
   }
 };
 
@@ -94,20 +96,16 @@ export const resetPasswordController = async (req: Request, res: Response) => {
 
   if (!token || !newPassword) {
     res.status(400).json({ error: "Token and new password are required" });
-    return 
+    return;
   }
 
   try {
     // Call service to reset the password
-    await resetPasswordService(token, newPassword);
+    await adminService.resetPasswordService(token, newPassword);
     res.status(200).json({ message: "Password reset successful" });
-    return 
+    return;
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
-    return 
+    return;
   }
-};
-
-export const userProfile = async (req: Request, res: Response) => {
-  res.send("Profile Here");
 };
