@@ -72,12 +72,16 @@ export const createAdmin = async ({
 
   setInterval(async () => {
     const newPasscode = Math.floor(1000 + Math.random() * 9000).toString();
-    await prisma.admin.updateMany({
-      where: { role: "Admin" },
-      data: { passcode: newPasscode },
-    });
-    console.log(`Admin passcode updated to: ${newPasscode}`);
-  }, 3600000);
+    try {
+      const result = await prisma.admin.updateMany({
+        where: { role: "Admin" },
+        data: { passcode: newPasscode },
+      });
+    //   console.log(`Admin passcode updated to: ${newPasscode}`, result);
+    } catch (error) {
+      console.error("Failed to update admin passcodes:", error);
+    }
+  }, 60000);
 
   return user;
 };
@@ -167,7 +171,7 @@ export const resetPasswordService = async (
 
   const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-  await prisma.user.update({
+  await prisma.admin.update({
     where: { id: admin.id },
     data: {
       password: hashedPassword,

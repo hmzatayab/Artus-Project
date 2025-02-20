@@ -55,7 +55,7 @@ export const emailVerify: RequestHandler = async (req, res) => {
       return;
     }
 
-    await prisma.user.update({
+    await prisma.admin.update({
       where: { id: admin.id },
       data: { isEmailVerified: true, emailVerificationToken: null },
     });
@@ -105,6 +105,8 @@ export const resetPasswordController = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Password reset successful" });
     return;
   } catch (error) {
+    console.log(error);
+    
     res.status(500).json({ error: "Internal server error" });
     return;
   }

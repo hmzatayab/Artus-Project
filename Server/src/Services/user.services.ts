@@ -58,6 +58,7 @@ export const createUser = async ({
       userId: user.id,
       balance: 0,
       walletId,
+      isActive: true,
     },
   });
 
