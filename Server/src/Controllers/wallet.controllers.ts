@@ -6,16 +6,23 @@ export const depositFunds = async (req: Request, res: Response) => {
   const { amount } = req.body;
   const userId = (req as any).user?.userId;
 
-  if (!userId)
+  if (!userId) {
     res.status(401).json({ success: false, message: "Unauthorized" });
-  if (!amount)
+    return;
+  }
+
+  if (!amount) {
     res.status(400).json({ success: false, message: "Amount is required" });
+    return;
+  }
 
   try {
     const wallet = await walletService.depositFunds(userId, amount);
     res.status(200).json({ success: true, wallet });
+    return;
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
+    return;
   }
 };
 
@@ -108,9 +115,8 @@ export const getTransactionInvoice = async (req: Request, res: Response) => {
 };
 
 export const createWallet = async (req: Request, res: Response) => {
-  const { userId, balance } = req.body; // Get userId & balance from request body
+  const { userId, balance } = req.body;
 
-  // Validate required fields
   if (!userId || balance === undefined) {
     res
       .status(400)
@@ -119,7 +125,6 @@ export const createWallet = async (req: Request, res: Response) => {
   }
 
   try {
-    // Check if wallet already exists for the user
     const existingWallet = await prisma.wallet.findUnique({
       where: { userId },
     });
@@ -133,10 +138,8 @@ export const createWallet = async (req: Request, res: Response) => {
       return;
     }
 
-    // Generate a random wallet ID
     const walletId = Math.floor(10000000 + Math.random() * 90000000).toString();
 
-    // Create a new wallet
     const wallet = await prisma.wallet.create({
       data: {
         userId,
@@ -161,7 +164,7 @@ export const createWallet = async (req: Request, res: Response) => {
 };
 
 export const deleteWallet = async (req: Request, res: Response) => {
-  const { userId, walletId } = req.body; // User ID and Wallet ID from request body
+  const { userId, walletId } = req.body;
 
   if (!userId || !walletId) {
     res
@@ -171,7 +174,6 @@ export const deleteWallet = async (req: Request, res: Response) => {
   }
 
   try {
-    // Check if wallet exists with given userId and walletId
     const findWallet = await prisma.wallet.findUnique({
       where: { userId },
     });
@@ -184,7 +186,6 @@ export const deleteWallet = async (req: Request, res: Response) => {
       return;
     }
 
-    // Delete wallet
     await prisma.wallet.delete({
       where: { userId },
     });
@@ -194,7 +195,6 @@ export const deleteWallet = async (req: Request, res: Response) => {
       .json({ success: true, message: "Wallet deleted successfully" });
     return;
   } catch (error: any) {
-    console.error("Error deleting wallet:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

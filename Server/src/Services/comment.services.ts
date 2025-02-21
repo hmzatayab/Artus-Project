@@ -14,7 +14,6 @@ export const createComment = async (commentData: {
     },
   });
 
-  // Post model mein comment ID add karna
   await prisma.post.update({
     where: { id: postId },
     data: { comments: { push: newComment.id } },
@@ -41,16 +40,10 @@ export const getCommentsByPostId = async (postId: string) => {
   });
 };
 
-export const addReply = async (
-  commentId: string,
-  userId: string,
-  content: string
-) => {
-  // Check if comment exists
+export const addReply = async (commentId: string, userId: string, content: string) => {
   const comment = await prisma.comment.findUnique({ where: { id: commentId } });
   if (!comment) throw new Error("Comment not found");
 
-  // Create new reply
   const newReply = await prisma.reply.create({
     data: {
       commentId,
@@ -60,7 +53,6 @@ export const addReply = async (
     },
   });
 
-  // Update replies array in the Comment
   await prisma.comment.update({
     where: { id: commentId },
     data: {

@@ -63,8 +63,6 @@ export const createUser = async ({
   });
 
   const verificationLink = `http://localhost:3000/user//verify-email?token=${emailVerificationToken}`;
-
-  // Placeholder for sending email
   console.log(`Verify your email by clicking here: ${verificationLink}`);
 
   return user;
@@ -95,17 +93,14 @@ export const loginUser = async ({ email, password }: LoginUserInput) => {
 };
 
 export const requestPasswordResetService = async (email: string) => {
-  // Find user by email
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     throw new Error("User not found");
   }
 
-  // Generate a reset token
   const resetToken = crypto.randomBytes(32).toString("hex");
-  const resetTokenExpiry = new Date(new Date().getTime() + 3600000); // Token valid for 1 hour
-
-  // Save the reset token and expiry time to the user
+  const resetTokenExpiry = new Date(new Date().getTime() + 3600000);
+  
   await prisma.user.update({
     where: { email },
     data: {
@@ -114,38 +109,36 @@ export const requestPasswordResetService = async (email: string) => {
     },
   });
 
-  // Log the reset link to the console (mocking email sending)
   const resetLink = `http://your-frontend-url/reset-password?token=${resetToken}`;
   console.log(`Password reset link (to send via email): ${resetLink}`);
 };
 
-export const resetPasswordService = async (
-  token: string,
-  newPassword: string
-) => {
-  const user = await prisma.user.findFirst({
-    where: { passwordResetToken: token },
-  });
-
-  if (!user) {
-    throw new Error("Invalid or expired reset token");
+export const resetPasswordService = async (token: string, newPassword: string) => {
+  try {
+    const user = await prisma.user.findFirst({
+      where: { passwordResetToken: token },
+    });
+  
+    if (!user) {
+      throw new Error("Invalid or expired reset token");
+    }
+  
+    const now = new Date();
+    if (user.passwordResetTokenExpiry && user.passwordResetTokenExpiry < now) {
+      throw new Error("Reset token has expired");
+    }
+  
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+  
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        passwordResetToken: null,
+        passwordResetTokenExpiry: null,
+      },
+    });
+  } catch (error) {
+    console.log(error);
   }
-
-  const now = new Date();
-  if (user.passwordResetTokenExpiry && user.passwordResetTokenExpiry < now) {
-    throw new Error("Reset token has expired");
-  }
-
-  const hashedPassword = await bcrypt.hash(newPassword, 12);
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      password: hashedPassword,
-      passwordResetToken: null,
-      passwordResetTokenExpiry: null,
-    },
-  });
-
-  console.log("Password updated successfully");
 };

@@ -1,15 +1,15 @@
 import { Router } from "express";
 
 import { authMiddleware } from "../Middleware/authMiddleware";
-import { createPost, getAllPosts, getPostsByUserId, updatePost, deletePost, likePost } from "../Controllers/post.controllers";
+import * as postController from "../Controllers/post.controllers";
 
 const router = Router();
 
-router.post("/create", authMiddleware, createPost);
-router.get("/:userId", getPostsByUserId);
-router.get("/", getAllPosts);
-router.patch('/:postId/like', authMiddleware, likePost);
-router.put("/:postId", authMiddleware, updatePost);
-router.delete("/:postId", authMiddleware, deletePost);
+router.get("/", postController.getAllPosts);
+router.post("/create", authMiddleware, postController.createPost);
+router.get("/:userId", postController.getPostsByUserId);
+router.patch('/:postId/like', authMiddleware, postController.likePost);
+router.put("/:postId", authMiddleware, postController.updatePost);
+router.delete("/:postId", authMiddleware, postController.deletePost);
 
 export default router;

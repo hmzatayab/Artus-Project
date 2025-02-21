@@ -62,7 +62,6 @@ export const emailVerify: RequestHandler = async (req, res) => {
 
     res.status(200).json({ message: "Email verified successfully" });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Failed to verify email" });
   }
 };
@@ -79,13 +78,10 @@ export const requestPasswordResetController = async (
   }
 
   try {
-    // Call service to request password reset
     await adminService.requestPasswordResetService(email, passcode);
     res.status(200).json({ message: "Password reset link sent to email" });
     return;
   } catch (error) {
-    console.log(error);
-    
     res.status(500).json({ error: "Internal server error" });
     return;
   }
@@ -100,13 +96,10 @@ export const resetPasswordController = async (req: Request, res: Response) => {
   }
 
   try {
-    // Call service to reset the password
     await adminService.resetPasswordService(token, newPassword);
     res.status(200).json({ message: "Password reset successful" });
     return;
   } catch (error) {
-    console.log(error);
-    
     res.status(500).json({ error: "Internal server error" });
     return;
   }

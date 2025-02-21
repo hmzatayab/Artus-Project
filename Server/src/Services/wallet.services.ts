@@ -1,19 +1,20 @@
 import prisma from "../config/DB";
+import { generateRandomId } from "../utils/generateId";
 
 export const depositFunds = async (userId: string, amount: number) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
 
+  const wallet = await prisma.wallet.findUnique({ where: { userId } });
+
   if (!user) throw new Error("User not found");
   if (!user.isEmailVerified)
     throw new Error("Email not verified. Please verify your email first.");
-  if (!user.walletIsActive)
+  if (!wallet?.isActive)
     throw new Error("Transaction failed because your wallet is not active.");
   if (user.isBlocked)
     throw new Error("Your account is blocked. Please contact support.");
-
-  const wallet = await prisma.wallet.findUnique({ where: { userId } });
 
   if (!wallet) throw new Error("Wallet not found");
 
@@ -28,22 +29,15 @@ export const depositFunds = async (userId: string, amount: number) => {
   });
 
   if (failedTransactions.length >= 5) {
-    await prisma.user.update({
+    await prisma.wallet.update({
       where: { id: userId },
-      data: { walletIsActive: false },
+      data: { isActive: false },
     });
 
     throw new Error(
       "Your wallet is temporarily blocked due to repeated failed transactions. Please try again later."
     );
   }
-
-  const InvoiceIdGen = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  };
-  const transactionIdGen = () => {
-    return Math.floor(100000000000 + Math.random() * 900000000000).toString();
-  };
 
   let updatedWallet;
   try {
@@ -56,18 +50,17 @@ export const depositFunds = async (userId: string, amount: number) => {
             type: "deposit",
             amount,
             status: "success",
-            transactionId: transactionIdGen(),
-            invoiceId: InvoiceIdGen(),
+            transactionId: generateRandomId(12),
+            invoiceId: generateRandomId(6),
           },
         },
       },
     });
 
-    // Create notification for deposit success
     await prisma.notification.create({
       data: {
         receiverId: userId,
-        senderId: userId, // Self-initiated deposit
+        senderId: userId,
         type: "deposit",
         message: `Your deposit of ${amount} was successful.`,
         link: `/wallet/${wallet.id}`,
@@ -81,8 +74,8 @@ export const depositFunds = async (userId: string, amount: number) => {
         type: "deposit",
         amount,
         status: "failed",
-        transactionId: transactionIdGen(),
-        invoiceId: InvoiceIdGen(),
+        transactionId: generateRandomId(12),
+        invoiceId: generateRandomId(6),
       },
     });
 
@@ -94,7 +87,6 @@ export const depositFunds = async (userId: string, amount: number) => {
       },
     });
 
-    // Create notification for failed deposit
     await prisma.notification.create({
       data: {
         receiverId: userId,
@@ -116,16 +108,15 @@ export const withdrawFunds = async (userId: string, amount: number) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
+  const wallet = await prisma.wallet.findUnique({ where: { userId } });
 
   if (!user) throw new Error("User not found");
   if (!user.isEmailVerified)
     throw new Error("Email not verified. Please verify your email first.");
-  if (!user.walletIsActive)
+  if (!wallet?.isActive)
     throw new Error("Transaction failed because your wallet is not active.");
   if (user.isBlocked)
     throw new Error("Your account is blocked. Please contact support.");
-
-  const wallet = await prisma.wallet.findUnique({ where: { userId } });
 
   if (!wallet) throw new Error("Wallet not found");
 
@@ -140,9 +131,9 @@ export const withdrawFunds = async (userId: string, amount: number) => {
   });
 
   if (failedTransactions.length >= 5) {
-    await prisma.user.update({
+    await prisma.wallet.update({
       where: { id: userId },
-      data: { walletIsActive: false },
+      data: { isActive: false },
     });
 
     throw new Error(
@@ -151,20 +142,14 @@ export const withdrawFunds = async (userId: string, amount: number) => {
   }
 
   if (wallet.balance < amount) {
-    // If insufficient funds, create a failed transaction
-    const transactionIdGen = Math.floor(
-      100000000000 + Math.random() * 900000000000
-    ).toString();
-    const InvoiceIdGen = Math.floor(100000 + Math.random() * 900000).toString();
-
     await prisma.transaction.create({
       data: {
         walletId: wallet.id,
         type: "withdraw",
         amount,
         status: "failed",
-        transactionId: transactionIdGen,
-        invoiceId: InvoiceIdGen,
+        transactionId: generateRandomId(12),
+        invoiceId: generateRandomId(6),
       },
     });
 
@@ -190,11 +175,6 @@ export const withdrawFunds = async (userId: string, amount: number) => {
     throw new Error("Insufficient funds. Transaction failed.");
   }
 
-  const InvoiceIdGen = Math.floor(100000 + Math.random() * 900000).toString();
-  const transactionIdGen = Math.floor(
-    100000000000 + Math.random() * 900000000000
-  ).toString();
-
   let updatedWallet;
   try {
     updatedWallet = await prisma.wallet.update({
@@ -206,8 +186,8 @@ export const withdrawFunds = async (userId: string, amount: number) => {
             type: "withdraw",
             amount,
             status: "success",
-            transactionId: transactionIdGen,
-            invoiceId: InvoiceIdGen,
+            transactionId: generateRandomId(12),
+            invoiceId: generateRandomId(6),
           },
         },
       },
@@ -230,8 +210,8 @@ export const withdrawFunds = async (userId: string, amount: number) => {
         type: "withdraw",
         amount,
         status: "failed",
-        transactionId: transactionIdGen,
-        invoiceId: InvoiceIdGen,
+        transactionId: generateRandomId(12),
+        invoiceId: generateRandomId(6),
       },
     });
 
@@ -272,14 +252,21 @@ export const transferFunds = async (
     where: { id: receiverId },
   });
 
+  const senderWallet = await prisma.wallet.findUnique({
+    where: { userId: senderId },
+  });
+  const receiverWallet = await prisma.wallet.findUnique({
+    where: { userId: receiverId },
+  });
+
   if (!sender || !receiver) throw new Error("User not found");
   if (!sender.isEmailVerified)
     throw new Error("Email not verified. Please verify your email first.");
   if (!receiver.isEmailVerified)
     throw new Error("Receiver Email not verified.");
-  if (!sender.walletIsActive)
+  if (!senderWallet?.isActive)
     throw new Error("Transaction failed because your wallet is not active.");
-  if (!receiver.walletIsActive)
+  if (!receiverWallet?.isActive)
     throw new Error(
       "Transaction failed because the recipient's wallet is not active."
     );
@@ -289,12 +276,6 @@ export const transferFunds = async (
 
   if (senderId === receiverId)
     throw new Error("Cannot transfer funds to yourself");
-  const senderWallet = await prisma.wallet.findUnique({
-    where: { userId: senderId },
-  });
-  const receiverWallet = await prisma.wallet.findUnique({
-    where: { userId: receiverId },
-  });
 
   if (!senderWallet || !receiverWallet) throw new Error("Wallet not found");
 
@@ -309,9 +290,9 @@ export const transferFunds = async (
   });
 
   if (failedTransactions.length >= 5) {
-    await prisma.user.update({
+    await prisma.wallet.update({
       where: { id: senderId },
-      data: { walletIsActive: false },
+      data: { isActive: false },
     });
 
     await prisma.notification.create({
@@ -332,19 +313,14 @@ export const transferFunds = async (
   }
 
   if (senderWallet.balance < amount) {
-    const transactionIdGen = Math.floor(
-      100000000000 + Math.random() * 900000000000
-    ).toString();
-    const InvoiceIdGen = Math.floor(100000 + Math.random() * 900000).toString();
-
     await prisma.transaction.create({
       data: {
         walletId: senderWallet.id,
         type: "transfer",
         amount,
         status: "failed",
-        transactionId: transactionIdGen,
-        invoiceId: InvoiceIdGen,
+        transactionId: generateRandomId(12),
+        invoiceId: generateRandomId(6),
       },
     });
 
@@ -358,9 +334,9 @@ export const transferFunds = async (
 
     const failedCount = senderWallet.failedTransactionCount + 1;
     if (failedCount >= 5) {
-      await prisma.user.update({
+      await prisma.wallet.update({
         where: { id: senderId },
-        data: { walletIsActive: false },
+        data: { isActive: false },
       });
 
       await prisma.notification.create({
@@ -390,12 +366,7 @@ export const transferFunds = async (
     throw new Error("Insufficient funds. Transaction failed.");
   }
 
-  const InvoiceIdGen = Math.floor(100000 + Math.random() * 900000).toString();
-  const transactionIdGen = Math.floor(
-    100000000000 + Math.random() * 900000000000
-  ).toString();
-
-  const transfer = await prisma.$transaction([
+  await prisma.$transaction([
     prisma.wallet.update({
       where: { userId: senderId },
       data: {
@@ -406,8 +377,8 @@ export const transferFunds = async (
             amount,
             toUserId: receiverId,
             status: "success",
-            transactionId: transactionIdGen,
-            invoiceId: InvoiceIdGen,
+            transactionId: generateRandomId(12),
+            invoiceId: generateRandomId(6),
           },
         },
       },
@@ -422,8 +393,8 @@ export const transferFunds = async (
             amount,
             fromUserId: senderId,
             status: "success",
-            transactionId: transactionIdGen,
-            invoiceId: InvoiceIdGen,
+            transactionId: generateRandomId(12),
+            invoiceId: generateRandomId(6),
           },
         },
       },

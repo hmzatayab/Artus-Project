@@ -18,7 +18,6 @@ export const createComment = async (req: Request, res: Response) => {
     });
     res.status(201).json({ success: true, comment: newComment });
   } catch (error) {
-    console.error("🚨 Create Comment Error:", error);
     res.status(500).json({ message: "Failed to create comment" });
   }
 };
@@ -29,7 +28,6 @@ export const getCommentsByPostId = async (req: Request, res: Response) => {
     const comments = await commentService.getCommentsByPostId(postId);
     res.status(200).json({ success: true, comments });
   } catch (error) {
-    console.error("🚨 Get Comments Error:", error);
     res.status(500).json({ message: "Failed to fetch comments" });
   }
 };
@@ -48,7 +46,6 @@ export const addReply = async (req: Request, res: Response) => {
     const newReply = await commentService.addReply(commentId, userId, content);
     res.status(201).json({ success: true, reply: newReply });
   } catch (error) {
-    console.error("🚨 Add Reply Error:", error);
     res.status(500).json({ message: "Failed to add reply" });
   }
 };
@@ -66,7 +63,6 @@ export const likeComment = async (req: Request, res: Response) => {
     const updatedComment = await commentService.likeComment(commentId, userId);
     res.status(200).json({ success: true, comment: updatedComment });
   } catch (error) {
-    console.error("🚨 Like Comment Error:", error);
     res.status(500).json({ message: "Failed to like/unlike comment" });
   }
 };

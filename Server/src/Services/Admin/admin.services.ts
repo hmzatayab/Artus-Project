@@ -2,6 +2,7 @@ import prisma from "../../config/DB";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+import { generateRandomId } from "../../utils/generateId";
 
 interface CreateAdminInput {
   email: string;
@@ -36,18 +37,13 @@ export const createAdmin = async ({
 
   const hashedPassword = await bcrypt.hash(password, 12);
   const emailVerificationToken = crypto.randomBytes(32).toString("hex");
-  const twoFactorCode = parseInt(crypto.randomBytes(4).toString("hex"), 16)
-    .toString()
-    .slice(0, 8);
-
-  const initialPasscode = Math.floor(1000 + Math.random() * 9000).toString();
 
   const user = await prisma.admin.create({
     data: {
       email,
       name,
-      passcode: initialPasscode,
-      adminId: twoFactorCode,
+      passcode: generateRandomId(4),
+      adminId: generateRandomId(8),
       password: hashedPassword,
       emailVerificationToken,
       walletIsActive: adminCount === 0,
@@ -66,8 +62,6 @@ export const createAdmin = async ({
   }
 
   const verificationLink = `http://localhost:3000/admin/verify-email?token=${emailVerificationToken}`;
-
-  // Placeholder for sending email
   console.log(`Verify your email by clicking here: ${verificationLink}`);
 
   setInterval(async () => {
@@ -77,11 +71,11 @@ export const createAdmin = async ({
         where: { role: "Admin" },
         data: { passcode: newPasscode },
       });
-    //   console.log(`Admin passcode updated to: ${newPasscode}`, result);
+        console.log(`Admin passcode updated to: ${newPasscode}`, result);
     } catch (error) {
       console.error("Failed to update admin passcodes:", error);
     }
-  }, 60000);
+  }, 30000);
 
   return user;
 };
@@ -135,7 +129,6 @@ export const requestPasswordResetService = async (
     throw new Error("Invalid passcode");
   }
 
-  // Generate a reset token
   const resetToken = crypto.randomBytes(32).toString("hex");
   const resetTokenExpiry = new Date(new Date().getTime() + 3600000);
 
@@ -147,7 +140,6 @@ export const requestPasswordResetService = async (
     },
   });
 
-  // Log the reset link to the console (mocking email sending)
   const resetLink = `http://your-frontend-url/reset-password?token=${resetToken}`;
   console.log(`Password reset link (to send via email): ${resetLink}`);
 };
