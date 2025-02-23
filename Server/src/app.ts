@@ -12,6 +12,7 @@ import commentRoute from "./Routers/comment.routes";
 import walletRoute from "./Routers/wallet.routes";
 import adminRoute from "./Routers/Admin/admin.routes";
 import auctionRoute from "./Routers/auction.routes";
+import notificationRoute from "./Routers/notification.routes";
 
 const app = express();
 
@@ -36,5 +37,6 @@ app.use("/comment", commentRoute);
 app.use("/wallet", walletRoute);
 app.use("/admin", adminRoute);
 app.use("/auction", auctionRoute);
+app.use("/notification", notificationRoute);
 
 export default app;

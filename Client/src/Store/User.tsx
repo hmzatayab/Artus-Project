@@ -23,3 +23,31 @@ export const loginUser = async (formData: { email: string; password: string }) =
 
   return await res.json();
 };
+
+export const getUserNotifications = async (token: string) => {
+  const res = await fetch(`${API_URL}/notification`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // Token bhejna zaroori hai
+    },
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch notifications");
+
+  return await res.json();
+};
+
+export const getProfileData = async (token: string) => {
+  const res = await fetch(`${API_URL}/user/profile`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // Token bhejna zaroori hai
+    },
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch notifications");
+
+  return await res.json();
+}

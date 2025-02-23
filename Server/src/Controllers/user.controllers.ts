@@ -67,7 +67,10 @@ export const emailVerify: RequestHandler = async (req, res) => {
   }
 };
 
-export const requestPasswordResetController = async (req: Request, res: Response) => {
+export const requestPasswordResetController = async (
+  req: Request,
+  res: Response
+) => {
   const { email } = req.body;
 
   if (!email) {
@@ -104,5 +107,40 @@ export const resetPasswordController = async (req: Request, res: Response) => {
 };
 
 export const userProfile = async (req: Request, res: Response) => {
-  res.send("Profile Here");
+  try {
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        posts: true,
+        comments: true,
+        replies: true,
+        auctions: true,
+        highestBids: true,
+        wonAuctions: true,
+        receivedNotifications: true,
+        sentNotifications: true,
+        Bid: true,
+        wallet: true,
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const { password, passwordResetToken, passwordResetTokenExpiry, ...userData } = user;
+
+    res.json(userData);
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };

@@ -146,7 +146,7 @@ export const completeAuction = async (auctionId: string) => {
       await prisma.notification.create({
         data: {
           receiverId: winnerId,
-          senderId: auction.sellerId,
+          senderId: admin?.id ?? "",
           type: "auction",
           link: `/auction/${auction.id}`,
           message: `Congratulations! You won the auction for post ${auction.postId}. Check your profile.`,

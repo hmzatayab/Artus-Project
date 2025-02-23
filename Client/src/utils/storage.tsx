@@ -1,13 +1,12 @@
 import CryptoJS from "crypto-js";
 
-const SECRET_KEY = import.meta.env.VITE_SECRET_KEY; // .env se load karo
+const SECRET_KEY = import.meta.env.VITE_SECRET_KEY; 
 
-// ✅ Encrypt and store in localStorage
+
 export const encryptData = (data: any) => {
   return CryptoJS.AES.encrypt(JSON.stringify(data), SECRET_KEY).toString();
 };
 
-// ✅ Decrypt data from localStorage
 export const decryptData = (encryptedData: string) => {
   try {
     const bytes = CryptoJS.AES.decrypt(encryptedData, SECRET_KEY);
@@ -18,19 +17,24 @@ export const decryptData = (encryptedData: string) => {
   }
 };
 
-// ✅ Save user securely in localStorage
 export const saveUser = (user: any) => {
   const encryptedUser = encryptData(user);
   localStorage.setItem("user", encryptedUser);
 };
 
-// ✅ Get user securely from localStorage
 export const getUser = () => {
   const encryptedUser = localStorage.getItem("user");
-  return encryptedUser ? decryptData(encryptedUser) : null;
+  if (!encryptedUser) {
+    return null;
+  }
+  const decryptedUser = decryptData(encryptedUser);
+  if (!decryptedUser) {
+    return null;
+  }
+  return decryptedUser; 
 };
 
-// ✅ Remove user from localStorage (Logout case)
+
 export const removeUser = () => {
   localStorage.removeItem("user");
 };
