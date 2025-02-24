@@ -102,7 +102,8 @@ function Header() {
                                     )}
                                     {notifications.length > 0 ? (
                                         notifications.map((notification) => (
-                                            <DropdownMenuItem className="cursor-pointer">
+                                            <div>
+                                                <DropdownMenuItem className="cursor-pointer mb-2">
                                                 <div className="">
                                                     <div>
                                                         <Link
@@ -136,6 +137,8 @@ function Header() {
                                                     </div>
                                                 </div>
                                             </DropdownMenuItem>
+                                                <DropdownMenuSeparator className="w-80 mx-auto opacity-50"/>
+                                            </div>
                                         ))
                                     ) : (
                                         <DropdownMenuItem className="cursor-pointer">
