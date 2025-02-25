@@ -2,8 +2,8 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { CalendarIcon, MessageSquare } from "lucide-react";
-import { RiVerifiedBadgeFill, RiHeartFill, RiHeartLine, RiChat1Fill, RiChat1Line, RiShareForwardFill, RiBookmarkFill, RiBookmarkLine, RiUser3Line } from "@remixicon/react";
+import { CalendarIcon } from "lucide-react";
+import { RiVerifiedBadgeFill, RiHeartFill, RiHeartLine, RiChat1Fill, RiChat1Line, RiShareForwardFill, RiBookmarkFill, RiBookmarkLine, RiUser3Line, RiGroupLine } from "@remixicon/react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 
 // Define Post Type
@@ -96,12 +96,12 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                                     </HoverCard>
                                 </div>
                             </div>
-                            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                            <div className="flex items-center justify-center space-x-1 text-xs text-muted-foreground">
                                 <div className="text-sm text-muted-foreground">
                                     {post.userData.followers.length || 0}2.2k
                                 </div>
-                                <span className="hidden md:hidden lg:inline 2xl:inline xl:inline space-x-2 text-md text-muted-foreground">followers</span>
-                                <span><RiUser3Line size={12} /></span>
+                                <span className="hidden md:hidden lg:inline 2xl:inline xl:inline space-x-2 text-[13px] text-muted-foreground">followers</span>
+                                <span><RiGroupLine size={12} /></span>
                             </div>
                         </div>
                     </Link>
