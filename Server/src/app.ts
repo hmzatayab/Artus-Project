@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // import { locationMiddleware } from "./Middleware/locationMiddleware";
 
@@ -15,6 +17,8 @@ import auctionRoute from "./Routers/auction.routes";
 import notificationRoute from "./Routers/notification.routes";
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 // app.use(locationMiddleware);
@@ -25,6 +29,9 @@ app.use(cors({
   origin: "http://localhost:5173", 
   credentials: true, 
 }));
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/Images", express.static(path.join(__dirname, "public/Images")));
+
 
 app.get("/", (req, res) => {
   res.send("Welcome to Artus!");

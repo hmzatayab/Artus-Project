@@ -9,17 +9,21 @@ export const createPost = async (postData: {
 }) => {
   const { userId, title, description, tags, imageURL } = postData;
 
-  const newPost = await prisma.post.create({
-    data: {
-      userId,
-      title,
-      description,
-      tags,
-      imageURL,
-    },
-  });
-
-  return newPost;
+  try {
+    const newPost = await prisma.post.create({
+      data: {
+        userId,
+        title,
+        description,
+        tags,
+        imageURL,
+        Status: "pending", // Default status
+      },
+    });
+    return newPost;
+  } catch (error) {
+    throw new Error("Error creating post: " + error);
+  }
 };
 
 export const getAllPosts = async () => {

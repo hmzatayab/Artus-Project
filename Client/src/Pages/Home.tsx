@@ -1,5 +1,5 @@
-import Hero from "@/components/Home/Hero"
-import '../../index.css'
+import Hero from "@/components/Hero"
+import '../index.css'
 import PostCard from "@/components/PostCard"
 
 const posts = [

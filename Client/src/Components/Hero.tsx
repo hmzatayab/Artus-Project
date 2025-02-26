@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
-import "../../index.css"
-import { Button } from "../ui/button"
+import "../index.css"
+import { Button } from "./ui/button"
 import { useTheme } from "@/components/DarkMode/theme-provider"
 
 function Hero() {

@@ -3,20 +3,30 @@ import * as postService from "../Services/post.services";
 
 export const createPost = async (req: Request, res: Response) => {
   try {
-    const { title, description, tags, imageURL } = req.body;
+    const { title, description, tags } = req.body;
     const userId = (req as any).user?.userId;
+    const imageURL = req.file
+      ? `${req.protocol}://${req.get("host")}/Images/${req.file.filename}`
+      : "";
+    const parsedTags = typeof tags === "string" ? JSON.parse(tags) : tags;
+
+    if (!userId) {
+      res.status(400).json({ message: "User not authenticated" });
+      return;
+    }
 
     const newPost = await postService.createPost({
       userId,
       title,
       description,
-      tags,
+      tags: parsedTags,
       imageURL,
     });
 
     res.status(201).json({ success: true, post: newPost });
   } catch (error) {
-    res.status(500).json({ message: "Failed to create post" });
+    console.error("Error creating post:", error);
+    res.status(500).json({ message: "Failed to create post", error: error });
   }
 };
 

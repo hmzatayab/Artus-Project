@@ -9,6 +9,23 @@ import PostCard from "@/components/PostCard";
 
 function Profile() {
   const [selectedTab, setSelectedTab] = useState("All Posts");
+  // const [posts, setPosts] = useState([]);
+
+  // useEffect(() => {
+  //     let filteredPosts = [];
+
+  //     if (selectedTab === "All Posts") {
+  //       filteredPosts = allPosts;
+  //     } else if (selectedTab === "Win Auctions") {
+  //       filteredPosts = allPosts.filter((post) => post.status === "win");
+  //     } else if (selectedTab === "Lost Auctions") {
+  //       filteredPosts = allPosts.filter((post) => post.status === "lost");
+  //     } else if (selectedTab === "Liked Posts") {
+  //       filteredPosts = allPosts.filter((post) => post.isLiked === true);
+  //     }
+
+  //     setPosts(filteredPosts);
+  //   }, [selectedTab, allPosts]);
 
   const menuOptions = [
     "All Posts",
@@ -17,12 +34,12 @@ function Profile() {
     "Liked Posts",
   ];
 
-  const postsData = {
-    "All Posts": ["Post 1", "Post 2", "Post 3", "Post 4", "Post 5", "Post 6"],
-    "Win Auctions": ["Win Auction Post 1", "Win Auction Post 2"],
-    "Lost Auctions": ["Lost Auction Post 1", "Lost Auction Post 2"],
-    "Liked Posts": ["Liked Post 1", "Liked Post 2"],
-  };
+  // const postsData = {
+  //   "All Posts": ["Post 1", "Post 2", "Post 3", "Post 4", "Post 5", "Post 6"],
+  //   "Win Auctions": ["Win Auction Post 1", "Win Auction Post 2"],
+  //   "Lost Auctions": ["Lost Auction Post 1", "Lost Auction Post 2"],
+  //   "Liked Posts": ["Liked Post 1", "Liked Post 2"],
+  // };
 
   const posts = [
     {
@@ -209,21 +226,6 @@ function Profile() {
       </Card>
 
 
-      {/* Posts Card */}
-      {/* <Card className="mt-4 mx-5 lg:mx-8 p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {postsData[selectedTab].map((post: any, index: any) => (
-            <div
-              key={index}
-              className="p-3 bg-gray-200 dark:bg-white/5 rounded-lg shadow-md flex justify-center"
-            >
-              {post}
-            </div>
-          ))}
-        </div>
-      </Card> */}
-
-
       <div className=" lg:mx-8 mt-4 mb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {posts.map((post) => (
@@ -241,3 +243,69 @@ export default Profile
 
 
 
+// import { useState, useEffect } from "react";
+// import { Card } from "@/components/ui/card";
+// import PostCard from "./PostCard"; // Ensure correct import
+
+// function Profile({ allPosts }) {
+//   const [selectedTab, setSelectedTab] = useState("All Posts");
+//   const [posts, setPosts] = useState([]); // Initially empty
+
+//   const menuOptions = [
+//     "All Posts",
+//     "Win Auctions",
+//     "Lost Auctions",
+//     "Liked Posts",
+//   ];
+
+//   // Function to filter posts based on selected tab
+//   useEffect(() => {
+//     let filteredPosts = [];
+
+//     if (selectedTab === "All Posts") {
+//       filteredPosts = allPosts;
+//     } else if (selectedTab === "Win Auctions") {
+//       filteredPosts = allPosts.filter((post) => post.status === "win");
+//     } else if (selectedTab === "Lost Auctions") {
+//       filteredPosts = allPosts.filter((post) => post.status === "lost");
+//     } else if (selectedTab === "Liked Posts") {
+//       filteredPosts = allPosts.filter((post) => post.isLiked === true);
+//     }
+
+//     setPosts(filteredPosts);
+//   }, [selectedTab, allPosts]);
+
+//   return (
+//     <>
+//       {/* Menu Section */}
+//       <Card className="mt-4 mx-5 lg:mx-8 p-2 rounded-2xl">
+//         <div className="flex justify-between gap-3">
+//           {menuOptions.map((option) => (
+//             <div
+//               key={option}
+//               className={`cursor-pointer h-10 flex justify-center items-center rounded-xl px-6 transition-all duration-300 ${
+//                 selectedTab === option ? "bg-white/10 w-full" : "hover:bg-white/20 w-full"
+//               }`}
+//               onClick={() => setSelectedTab(option)}
+//             >
+//               <span className="font-medium">{option}</span>
+//             </div>
+//           ))}
+//         </div>
+//       </Card>
+
+//       {/* Posts Section */}
+//       <div className="lg:mx-8 mt-4 mb-8">
+//         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+//           {posts.length > 0 ? (
+//             posts.map((post) => <PostCard key={post._id} post={post} />)
+//           ) : (
+//             <p className="text-center col-span-full text-gray-500">No posts found.</p>
+//           )}
+//         </div>
+//       </div>
+//     </>
+//   );
+// }
+
+// export default Profile;

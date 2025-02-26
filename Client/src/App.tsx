@@ -1,10 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner"
-import Home from "./Pages/Users/Home";
-import Login from "./Pages/Users/Login";
-import Register from "./Pages/Users/Register";
-import Header from "./components/Home/Header";
-import Dashboard from "./Pages/Users/Dashboard";
+import Home from "./Pages/Home";
+import Login from "./Pages/Login";
+import Register from "./Pages/Register";
+import Header from "./components/Header";
+import Dashboard from "./Pages/Dashboard";
+import Followers from "./Pages/Followers";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function MainLayout() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/Followers" element={<Followers />} />
       </Routes>
     </>
   );

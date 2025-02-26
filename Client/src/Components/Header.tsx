@@ -5,22 +5,16 @@ import { getUser, removeUser } from "@/utils/storage";
 import { getUserNotifications } from "@/Store/User";
 import { toast } from "sonner"
 import { cn } from "@/lib/utils";
-import { Bell, Menu } from "lucide-react";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Menu } from "lucide-react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import React, { useEffect, useState } from "react";
-import { formatDistanceToNow } from 'date-fns';
-import {
-    NavigationMenu,
-    NavigationMenuContent,
-    NavigationMenuItem,
-    NavigationMenuLink,
-    NavigationMenuList,
-    NavigationMenuTrigger,
-    navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
-
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle, } from "@/components/ui/navigation-menu"
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import CreatePostDrawer from "./CreatePostDrawer"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
+import NotificationDropdown from "./Notification";
 
 interface Notification {
     id: string;
@@ -102,6 +96,8 @@ ListItem.displayName = "ListItem"
 function Header() {
     const Navigator = useNavigate();
     const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [open, setOpen] = useState(false);
+    const [openDailog, setOpenDailog] = useState(false);
     // console.log(notifications[0].sender.image);
 
     const data = getUser();
@@ -113,6 +109,14 @@ function Header() {
         Navigator("/");
         toast("Signout successful")
     })
+
+    const handleOpen = () => {
+        if (!token) {
+            toast("Login First! Image cannot be submitted");
+            return;
+        }
+        setOpenDailog(true);
+    };
 
     useEffect(() => {
         const fetchNotifications = async () => {
@@ -204,74 +208,8 @@ function Header() {
                     {token ? (
                         <div className="flex items-center gap-4 justify-center">
 
-                            <DropdownMenu>
-                                <DropdownMenuTrigger>
-                                    <div className="relative cursor-pointer">
-                                        <Bell className="w-6 h-6" />
+                            <NotificationDropdown notifications={notifications} />
 
-                                        {/* Red Notification Badge */}
-                                        {notifications.length > 0 && (
-                                            <span className="absolute -top-1 -right-3 flex items-center justify-center bg-red-500 w-5 h-4 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                                {notifications.filter((notification) => !notification.isRead).length}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-96 max-h-[500px] overflow-hidden overflow-y-auto no-scrollbar mt-2">
-                                    {notifications.length > 0 && (
-                                        <div>
-                                            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                                            <DropdownMenuSeparator />
-                                        </div>
-                                    )}
-                                    {notifications.length > 0 ? (
-                                        notifications.map((notification) => (
-                                            <div>
-                                                <DropdownMenuItem className="cursor-pointer mb-2">
-                                                    <div className="">
-                                                        <div>
-                                                            <Link
-                                                                to="/some-page"
-                                                                className="flex px-4 py-3 transition"
-                                                            >
-                                                                <div className="shrink-0 relative">
-                                                                    <Link to="/profile/username">
-                                                                        <img
-                                                                            className="rounded-full w-11 h-11"
-                                                                            src={notification.sender.image}
-                                                                            alt="Notification"
-                                                                        />
-                                                                    </Link>
-                                                                    {!notification.isRead && (
-                                                                        <div className="absolute flex items-center justify-center w-3 h-3 ms-7 -mt-3 rounded-full bg-red-500 outline-3 outline-white ">
-                                                                        </div>
-                                                                    )}
-
-                                                                </div>
-                                                                <div className="w-full ps-3">
-                                                                    <div className="text-sm mb-1.5 flex">
-                                                                        <div className="flex items-center text-sm mb-1.5">
-                                                                            <span>{notification.message}</span>
-                                                                        </div>
-
-                                                                    </div>
-                                                                    <div className="text-xs ">{formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}</div>
-                                                                </div>
-                                                            </Link>
-                                                        </div>
-                                                    </div>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator className="w-80 mx-auto opacity-50" />
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <DropdownMenuItem className="cursor-pointer">
-                                            No notifications
-                                        </DropdownMenuItem>
-                                    )}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
                             <DropdownMenu>
                                 <DropdownMenuTrigger>
                                     <Avatar className="cursor-pointer">
@@ -287,9 +225,58 @@ function Header() {
                                     <DropdownMenuItem className="cursor-pointer"><Link to={'/dashboard'}>Dashboard</Link></DropdownMenuItem>
                                     <DropdownMenuItem className="cursor-pointer">Billing</DropdownMenuItem>
                                     <DropdownMenuItem className="cursor-pointer">Subscription</DropdownMenuItem>
-                                    <DropdownMenuItem className="text-red-500 cursor-pointer" onClick={LogOut}>Sign Out</DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        className="text-red-500 cursor-pointer"
+                                        onClick={() => setOpen(true)}
+                                    >
+                                        Sign Out
+                                    </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
+
+
+
+
+
+
+
+
+
+                            <AlertDialog open={open} onOpenChange={setOpen}>
+                                <AlertDialogContent className=" rounded-lg shadow-lg">
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle className="text-2xl font-bold">
+                                            Are you sure you want to sign out?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription className="text-gray-600">
+                                            This will log you out of your account. You’ll need to sign back in to access your account.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel
+                                            onClick={() => setOpen(false)}
+                                            className=" "
+                                        >
+                                            Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={LogOut}
+                                            className="bg-red-600 hover:bg-red-700 text-white"
+                                        >
+                                            Sign Out
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+
+
+
+
+
+
+
+
                         </div>
                     ) : (
                         <Button variant="outline" asChild>
@@ -297,9 +284,24 @@ function Header() {
                         </Button>
                     )}
 
-                    <Button asChild>
-                        <Link to="/submit">Submit an image</Link>
-                    </Button>
+
+
+
+                    <Dialog open={openDailog} onOpenChange={setOpenDailog}>
+
+                        <Button className="cursor-pointer" onClick={handleOpen}>
+                            Submit an image
+                        </Button>
+
+
+                        <DialogContent>
+                            <CreatePostDrawer />
+                        </DialogContent>
+                    </Dialog>
+
+
+
+
                     <ModeToggle />
                 </div>
 
@@ -307,56 +309,8 @@ function Header() {
                 <div className="items-center gap-4 flex md:hidden">
                     {token ? (
                         <div className="flex gap-4 items-center justify-center">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger>
-                                    <div className="relative cursor-pointer">
-                                        <Bell className="w-6 h-6" />
+                            <NotificationDropdown notifications={notifications} />
 
-                                        {/* Red Notification Badge */}
-                                        {notifications.length > 0 && (
-                                            <span className="absolute -top-1 -right-3 flex items-center justify-center bg-red-500 w-5 h-4 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                                {notifications.length}
-                                            </span>
-                                        )}
-                                    </div>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-96 max-h-[500px] mt-2 mr-4 overflow-hidden overflow-y-auto no-scrollbar">
-                                    <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    {notifications.map((notification) => (
-                                        <DropdownMenuItem className="cursor-pointer">
-                                            <div className="flex">
-                                                <div>
-                                                    <Link
-                                                        to="/some-page"
-                                                        className="flex px-4 py-3 transition"
-                                                    >
-                                                        <div className="shrink-0 relative">
-                                                            <Link to="/profile/username">
-                                                                <img
-                                                                    className="rounded-full w-11 h-11"
-                                                                    src="https://github.com/shadcn.png"
-                                                                    alt="Notification"
-                                                                />
-                                                            </Link>
-                                                            {!notification.isRead && (
-                                                                <div className="absolute flex items-center justify-center w-3 h-3 ms-7 -mt-3 rounded-full bg-red-600 border outline-3 outline-white">
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="w-full ps-3">
-                                                            <div className="text-sm mb-1.5">
-                                                                {notification.message}
-                                                            </div>
-                                                            <div className="text-xs ">{formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}</div>
-                                                        </div>
-                                                    </Link>
-                                                </div>
-                                            </div>
-                                        </DropdownMenuItem>
-                                    ))}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
                             <DropdownMenu>
                                 <DropdownMenuTrigger>
                                     <Avatar>
@@ -390,6 +344,12 @@ function Header() {
                                     This action cannot be undone. This will permanently delete your account
                                     and remove your data from our servers.
                                 </SheetDescription>
+                                <Dialog>
+                                    <DialogTrigger>
+                                        <Button className="cursor-pointer">Submit an image</Button>
+                                    </DialogTrigger>
+                                    <CreatePostDrawer />
+                                </Dialog>
                             </SheetHeader>
                         </SheetContent>
                     </Sheet>

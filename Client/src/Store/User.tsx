@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const registerUser = async (formData: { email: string; username: string; name: string; password: string }) => {
@@ -51,3 +53,17 @@ export const getProfileData = async (token: string) => {
 
   return await res.json();
 }
+
+export const uploadImage = async (formData: FormData, token: string) => {
+  try {
+    const response = await axios.post(`${API_URL}/post/create`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error("Failed to upload image");
+  }
+};

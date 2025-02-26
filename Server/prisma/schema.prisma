@@ -96,6 +96,7 @@ model Post {
   comments             String[] @default([]) @db.ObjectId
   isLikedByCurrentUser Boolean  @default(false)
   imageURL             String
+  Status               String
   isLive               Boolean  @default(false)
   isAuctioned          Boolean  @default(false)
   auctionId            String?  @db.ObjectId
