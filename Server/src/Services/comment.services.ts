@@ -16,7 +16,7 @@ export const createComment = async (commentData: {
 
   await prisma.post.update({
     where: { id: postId },
-    data: { comments: { push: newComment.id } },
+    data: { comments: { connect: { id: newComment.id } } },
   });
   return newComment;
 };

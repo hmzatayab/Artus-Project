@@ -30,7 +30,27 @@ export const getAllPosts = async () => {
   return await prisma.post.findMany({
     include: {
       user: {
-        select: { id: true, username: true, email: true },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          name: true,
+          image: true,
+          followers: true,
+          identityVerified: true,
+        },
+      },
+      comments: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -42,7 +62,60 @@ export const getPostsByUserId = async (userId: string) => {
     where: { userId },
     include: {
       user: {
-        select: { id: true, username: true, email: true },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          name: true,
+          image: true,
+          followers: true,
+        },
+      },
+    },
+  });
+};
+
+export const getPostById = async (postId: string) => {
+  return await prisma.post.findUnique({
+    where: { id: postId },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      tags: true,
+      likes: true,
+      isLikedByCurrentUser: true,
+      imageURL: true,
+      Status: true,
+      isLive: true,
+      isAuctioned: true,
+      auctionId: true,
+      OwnerId: true,
+      createdAt: true,
+      updatedAt: true,
+      user: {
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          name: true,
+          image: true,
+          followers: true,
+          identityVerified: true,
+        },
+      },
+      comments: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+              followers: true,
+              identityVerified: true,
+            },
+          },
+        },
       },
     },
   });

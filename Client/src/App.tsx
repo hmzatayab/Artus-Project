@@ -6,6 +6,7 @@ import Register from "./Pages/Register";
 import Header from "./components/Header";
 import Dashboard from "./Pages/Dashboard";
 import Followers from "./Pages/Followers";
+import Post from "./Pages/Post";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function MainLayout() {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/Followers" element={<Followers />} />
+        <Route path="/post/:postId" element={<Post/>}/>
       </Routes>
     </>
   );

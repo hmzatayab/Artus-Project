@@ -49,6 +49,22 @@ export const getPostsByUserId = async (req: Request, res: Response) => {
   }
 };
 
+export const getPostById = async (req: Request, res: Response) => {
+  try {
+    const { postId } = req.params;
+    const post = await postService.getPostById(postId);
+
+    if (!post) {
+      res.status(404).json({ message: "Post not found" });
+      return;
+    }
+
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve post details" });
+  }
+};
+
 export const updatePost = async (req: Request, res: Response) => {
   try {
     const { postId } = req.params;

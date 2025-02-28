@@ -21,6 +21,7 @@ interface NotificationDropdownProps {
 
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notifications }) => {
     return (
+
         <DropdownMenu>
             <DropdownMenuTrigger>
                 <div className="relative cursor-pointer">
@@ -35,7 +36,8 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notificatio
                 </div>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent className="w-96 max-h-[500px] overflow-hidden overflow-y-auto no-scrollbar mt-2">
+
+            <DropdownMenuContent className="w-96 max-h-[500px] overflow-hidden overflow-y-auto no-scrollbar mt-2 dark:shadow-lg dark:shadow-gray-700/50 shadow-lg shadow-gray-700/50">
                 {notifications.length > 0 && (
                     <div>
                         <div className="flex justify-between items-center px-2 py-1">
@@ -90,8 +92,23 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notificatio
                     <DropdownMenuItem className="cursor-pointer">No notifications</DropdownMenuItem>
                 )}
             </DropdownMenuContent>
+
         </DropdownMenu>
+
+
     );
 };
 
 export default NotificationDropdown;
+
+
+
+
+
+
+
+
+
+
+
+
