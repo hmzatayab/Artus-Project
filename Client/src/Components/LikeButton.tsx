@@ -10,9 +10,10 @@ interface LikeButtonProps {
     postId: string;
     initialLikes: number;
     isInitiallyLiked: boolean;
+    color: string;
 }
 
-const LikeButton: React.FC<LikeButtonProps> = ({ postId, initialLikes, isInitiallyLiked }) => {
+const LikeButton: React.FC<LikeButtonProps> = ({ postId, initialLikes, isInitiallyLiked, color }) => {
     const [isLiked, setIsLiked] = useState<boolean>(isInitiallyLiked);
     const [likesCount, setLikesCount] = useState<number>(initialLikes);
 
@@ -40,7 +41,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({ postId, initialLikes, isInitial
         <Button
             onClick={handleLike}
             variant="outline"
-            className="px-4 py-2 rounded-full cursor-pointer dark:bg-gray-900 bg-gray-300"
+            className={`px-4 py-2 rounded-full cursor-pointer dark:${color} bg-gray-300`}
         >
             {token ? (
                 isLiked ? <RiHeartFill className="text-red-500" size={32} /> : <RiHeartLine size={32} />

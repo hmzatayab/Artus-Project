@@ -1,26 +1,18 @@
 import axios from "axios";
+import { Comment, ReplyType } from "@/types/Comment";
+import { Post } from "@/types/Post";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type Post = {
+
+interface CommentType {
     id: string;
-    imageURL: string;
-    isLive: boolean;
-    title: string;
-    description: string;
-    tags: string[];
-    createdAt: string;
+    content: string;
     user: {
-        id: string;
         name: string;
-        username: string;
         image: string;
-        followers: number[];
-        identityVerified: boolean;
     };
-    likes: number[];
-    comments: {}[];
-};
+}
 
 interface LikeResponse {
     post: {
@@ -28,6 +20,7 @@ interface LikeResponse {
         likes: string[];
     };
 }
+
 
 export const getAllPosts = async () => {
     const res = await fetch(`${API_URL}/post`, {
@@ -80,6 +73,96 @@ export const getPost = async (postId: string): Promise<Post> => {
         return response.data;
     } catch (error) {
         console.error("Error fetching post:", error);
+        throw error;
+    }
+};
+
+export const getPostComments = async (postId: string): Promise<Comment[]> => {
+    try {
+        const response = await axios.get<{ success: boolean; comments: Comment[] }>(
+            `${API_URL}/comment/${postId}`
+        );
+        return response.data.comments;
+    } catch (error) {
+        console.error("Error fetching comments:", error);
+        throw error;
+    }
+};
+
+export const createComment = async (postId: string, content: string, token: string): Promise<{ comment: CommentType }> => {
+    try {
+        const response = await axios.post(
+            `${API_URL}/comment/create`,
+            { postId, content }, // Body JSON data
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, // Token in headers
+                },
+            }
+        );
+        return response.data as { comment: CommentType };
+    } catch (error) {
+        console.error("Error creating comment:", error);
+        throw error;
+    }
+};
+
+export const createReply = async (
+    commentId: string,
+    content: string,
+    token: string
+): Promise<{ reply: ReplyType }> => {
+    try {
+        const response = await axios.post(
+            `${API_URL}/comment/${commentId}/reply`,
+            { content }, // Body JSON data
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, // Token in headers
+                },
+            }
+        );
+        return response.data as { reply: ReplyType };
+    } catch (error) {
+        console.error("Error creating reply:", error);
+        throw error;
+    }
+};
+
+export const likeComment = async (commentId: string, token: string): Promise<{ success: boolean }> => {
+    try {
+        const response = await axios.post(
+            `${API_URL}/comment/${commentId}/like`,
+            {}, // Empty body for POST request
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Token in headers
+                },
+            }
+        );
+        return response.data as { success: boolean; comment: CommentType };
+    } catch (error) {
+        console.error("Error liking comment:", error);
+        throw error;
+    }
+};
+
+export const likeCommentReply = async (replyId: string, token: string): Promise<{ success: boolean }> => {
+    try {
+        const response = await axios.post(
+            `${API_URL}/comment/reply/like/${replyId}`,
+            {}, // Empty body for POST request
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Token in headers
+                },
+            }
+        );
+        return response.data as { success: boolean; comment: CommentType };
+    } catch (error) {
+        console.error("Error liking comment:", error);
         throw error;
     }
 };

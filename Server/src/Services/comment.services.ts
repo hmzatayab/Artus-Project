@@ -26,12 +26,12 @@ export const getCommentsByPostId = async (postId: string) => {
     where: { postId },
     include: {
       user: {
-        select: { name: true, image: true },
+        select: { name: true, image: true, identityVerified: true, username: true  },
       },
       replies: {
         include: {
           user: {
-            select: { name: true, image: true },
+            select: { name: true, image: true, identityVerified: true, username: true },
           },
         },
       },

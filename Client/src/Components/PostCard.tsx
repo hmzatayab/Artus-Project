@@ -33,6 +33,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
     const data = getUser();
 
     return (
+
         <Card className="shadow-lg dark:shadow-gray-800/50 shadow-gray-500/50 dark:bg-gray-950 bg-gray-200 rounded-lg overflow-hidden h-fit p-4 transition duration-500"> {/**  bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 animate-pulse */}
             {/* Post Image */}
             <div className="relative w-full pb-[140%] overflow-hidden rounded-lg cursor-pointer">
@@ -52,7 +53,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                     <Link to={`/profile`} className="flex items-center space-x-3 cursor-pointer">
                         <Avatar className="w-12 h-12 outline-2 border-3 dark:border-gray-950 border-white outline-green-500">
                             <AvatarImage src={post.user.image} alt="User Profile" />
-                            <AvatarFallback>HC</AvatarFallback>
+                            <AvatarFallback className="text-green-500">{post.user.name.split(" ")[0].slice(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div>
                             <div className="flex items-center space-x-1">
@@ -115,14 +116,11 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                         {post.isLive ? (
 
                             <>
-                                {/* <Button variant="outline" className="px-4 py-2 rounded-full cursor-pointer dark:bg-gray-900 bg-gray-300">
-                                    <RiHeartLine size={32} />
-                                    {post.likes.length}
-                                </Button> */}
                                 <LikeButton
                                     postId={post.id}
                                     initialLikes={post.likes.length}
                                     isInitiallyLiked={data?.user?.id ? post.likes.includes(data.user.id) : false}
+                                    color={"bg-gray-900"}
                                 />
 
 
@@ -134,7 +132,6 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                                 </Link>
                             </>
                         ) : (
-                            // If post is not live, show only "In Review" button
                             <Button variant="outline" className="px-4 py-2 rounded-full cursor-pointer dark:bg-yellow-700 bg-gray-300">
                                 In Review
                             </Button>

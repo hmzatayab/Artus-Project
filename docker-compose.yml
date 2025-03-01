@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./Server
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./Server/.env
+    volumes:
+      - ./Server:/app
+      - /app/node_modules
+    command: ["npm", "run", "dev"]
+
+  frontend:
+    build:
+      context: ./Client
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./Client:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # File watching enable
+    command: ["npm", "run", "dev", "--", "--host"]

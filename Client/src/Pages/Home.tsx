@@ -3,6 +3,8 @@ import '../index.css'
 import PostCard from "@/components/PostCard"
 import { getAllPosts } from "../Store/Post"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
+import { PostCardSkeleton } from "@/components/Skeleton/PostCard"
 
 interface Post {
     id: string;
@@ -19,7 +21,7 @@ interface Post {
     comments: {}[];
 }
 
-  
+
 
 function Home() {
     const [posts, setPosts] = useState<Post[]>([]); // State for storing posts
@@ -37,12 +39,10 @@ function Home() {
                 setLoading(false);
             }
         };
-
-        fetchPosts(); // Call function on component mount
+        fetchPosts();
     }, []);
 
-    if (loading) return <p>Loading posts...</p>;
-    if (error) return <p className="text-red-500">{error}</p>;
+    if (error) return toast(`${error}`);
 
     return (
         <div className="mb-10">
@@ -51,11 +51,23 @@ function Home() {
             </div>
             <div className="relative -mt-[50vh] sm:-mt-[30vh] md:-mt-[5vh] lg:-mt-[8vh] xl:mt-[15vh] 2xl:-mt-[20vh] z-10">
                 <div className="mx-auto px-4 md:px-8 lg:px-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                    {posts
-                    .filter(post => post.isLive)
-                    .map((post, index) => (
-                        <PostCard key={index} post={post} />
-                    ))}
+                    {loading ? (
+                        <>
+                            <PostCardSkeleton />
+                            <PostCardSkeleton />
+                            <PostCardSkeleton />
+                            <PostCardSkeleton />
+                        </>
+                    ) : (
+                        <>
+                            {posts
+                                .filter(post => post.isLive)
+                                .map((post, index) => (
+
+                                    <PostCard key={index} post={post} />
+                                ))}
+                        </>
+                    )}
                 </div>
             </div>
         </div>

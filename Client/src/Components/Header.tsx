@@ -94,7 +94,7 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem"
 
 function Header() {
-    const Navigator = useNavigate();
+    // const Navigator = useNavigate();
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [open, setOpen] = useState(false);
     const [openDailog, setOpenDailog] = useState(false);
@@ -106,7 +106,7 @@ function Header() {
     const LogOut = (() => {
         removeUser();
         localStorage.removeItem("userToken");
-        Navigator("/");
+        // Navigator("/");
         toast("Signout successful")
     })
 
@@ -214,7 +214,7 @@ function Header() {
                                 <DropdownMenuTrigger>
                                     <Avatar className="cursor-pointer">
                                         <AvatarImage src={data.user.image} />
-                                        <AvatarFallback>
+                                        <AvatarFallback className="text-green-500">
                                             {data.user.name.split(" ")[0].slice(0, 2).toUpperCase()}
                                         </AvatarFallback>
                                     </Avatar>
