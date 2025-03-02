@@ -10,7 +10,7 @@ import { Link, useParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { CalendarIcon } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import LikeButton from "@/components/LikeButton";
 import { toast } from "sonner"
 import { getUser } from "@/utils/storage";
@@ -18,26 +18,27 @@ import PostCard from "@/components/PostCard";
 import CommentCard from "@/components/Comment";
 import { PostSkeleton } from "@/components/Skeleton/Post";
 import { PostCardSkeleton } from "@/components/Skeleton/PostCard";
+import { Post } from "@/Types/Post"
 
-type Post = {
-    id: string;
-    imageURL: string;
-    isLive: boolean;
-    title: string;
-    description: string;
-    tags: string[];
-    createdAt: string;
-    user: {
-        id: string;
-        name: string;
-        username: string;
-        image: string;
-        followers: number[];
-        identityVerified: boolean;
-    };
-    likes: number[];
-    comments: {}[];
-};
+// type Post = {
+//     id: string;
+//     imageURL: string;
+//     isLive: boolean;
+//     title: string;
+//     description: string;
+//     tags: string[];
+//     createdAt: string;
+//     user: {
+//         id: string;
+//         name: string;
+//         username: string;
+//         image: string;
+//         followers: number[];
+//         identityVerified: boolean;
+//     };
+//     likes: number[];
+//     comments: {}[];
+// };
 
 export default function PostPage() {
     const { postId } = useParams();
@@ -90,7 +91,7 @@ export default function PostPage() {
                 <div className="flex justify-center mt-10">
                     <div className="lg:w-[82%] w-[95%] flex flex-col md:flex-row gap-3">
                         {/* Left Column - Image */}
-                        <div className="w-full md:w-[30%] dark:bg-gray-950 border rounded-xl p-6 flex items-center justify-center">
+                        <div className="w-full md:w-[30%] dark:bg-gray-950 bg-gray-200 border rounded-xl p-6 flex items-center justify-center">
                             <img
                                 className="w-full h-auto max-h-[80vh] object-contain rounded-xl"
                                 src={post.imageURL}
@@ -99,7 +100,7 @@ export default function PostPage() {
                         </div>
 
                         {/* Right Column - Post Details */}
-                        <div className="w-full md:w-[70%] dark:bg-gray-950 border rounded-xl p-6 flex flex-col gap-3">
+                        <div className="w-full md:w-[70%] dark:bg-gray-950 bg-gray-200 border rounded-xl p-6 flex flex-col gap-3">
                             {/* User Profile Row */}
                             <div className="flex items-center justify-between lg:flex-row">
                                 <div className="flex items-center gap-4">
@@ -156,64 +157,29 @@ export default function PostPage() {
                                     </div>
                                 </div>
 
-                                <div className=" flex gap-2 items-center">
-                                    <div className="hidden lg:inline-block bg-transparent cursor-pointer"><RiBookmarkLine /></div>
+                                <div>
+
+
+
+
+
 
                                     <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <RiMore2Fill className="cursor-pointer"/>
+                                        <DropdownMenuTrigger>
+                                            <RiMore2Fill className="cursor-pointer" />
                                         </DropdownMenuTrigger>
-                                        <DropdownMenuContent className="w-56">
-                                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuGroup>
-                                                <DropdownMenuItem>
-                                                    Profile
-                                                    <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    Billing
-                                                    <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    Settings
-                                                    <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    Keyboard shortcuts
-                                                    <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
-                                                </DropdownMenuItem>
-                                            </DropdownMenuGroup>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuGroup>
-                                                <DropdownMenuItem>Team</DropdownMenuItem>
-                                                <DropdownMenuSub>
-                                                    <DropdownMenuSubTrigger>Invite users</DropdownMenuSubTrigger>
-                                                    <DropdownMenuPortal>
-                                                        <DropdownMenuSubContent>
-                                                            <DropdownMenuItem>Email</DropdownMenuItem>
-                                                            <DropdownMenuItem>Message</DropdownMenuItem>
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuItem>More...</DropdownMenuItem>
-                                                        </DropdownMenuSubContent>
-                                                    </DropdownMenuPortal>
-                                                </DropdownMenuSub>
-                                                <DropdownMenuItem>
-                                                    New Team
-                                                    <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
-                                                </DropdownMenuItem>
-                                            </DropdownMenuGroup>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem>GitHub</DropdownMenuItem>
-                                            <DropdownMenuItem>Support</DropdownMenuItem>
-                                            <DropdownMenuItem disabled>API</DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem>
-                                                Log out
-                                                <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+                                        <DropdownMenuContent>
+                                            <DropdownMenuItem className="cursor-pointer"><Link to={'/'}>Report</Link></DropdownMenuItem>
+                                            <DropdownMenuItem className="cursor-pointer">Copy link</DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                className="text-red-500 cursor-pointer"
+                                            >
+                                                Delete
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
+
+
 
                                 </div>
 
@@ -223,7 +189,7 @@ export default function PostPage() {
                             <h1 className="text-2xl font-bold">{post.title}</h1>
 
                             {/* Description Section */}
-                            <p className="text-gray-300 leading-relaxed">{post.description}</p>
+                            <p className=" leading-relaxed">{post.description}</p>
 
                             {/* Tags Section */}
                             <div className="flex flex-wrap gap-2">
@@ -248,21 +214,25 @@ export default function PostPage() {
 
                             {/* menu section  */}
                             <div className="flex flex-col justify-between">
-                                <div className="flex justify-between items-center p-2 bg-[#050c1c] rounded-lg border mb-2">
-                                    <div>
+                                <div className="flex justify-between items-center p-2 dark:bg-[#050c1c] bg-white rounded-lg border mb-2">
+                                    <div className="xs:flex xs:items-center xs:justify-around xs:w-full">
                                         <LikeButton
                                             postId={post.id}
                                             initialLikes={post.likes.length}
                                             isInitiallyLiked={data?.user?.id && post?.likes ? post.likes.includes(data.user.id) : false}
                                             color={"bg-black"}
                                         />
-                                        <Button variant="outline" className="rounded-full ml-2 cursor-pointer bg-black" onClick={() => setActiveTab("comments")}>
+                                        <Button variant="outline" className="rounded-full ml-2 cursor-pointer dark:bg-black bg-gray-300" onClick={() => setActiveTab("comments")}>
                                             <RiChat1Line />
                                             {post.comments?.length || 0}
                                         </Button>
-                                        <Button variant="outline" className="rounded-full ml-2 cursor-pointer bg-black" onClick={() => setActiveTab("ownership")}>
+                                        <Button variant="outline" className="rounded-full ml-2 cursor-pointer dark:bg-black bg-gray-300" >
+                                            <RiBookmarkLine />
+                                            {post.comments?.length || 0}
+                                        </Button>
+                                        <Button variant="outline" className="rounded-full ml-2 cursor-pointer dark:bg-black bg-gray-300" onClick={() => setActiveTab("ownership")}>
                                             <RiUserStarLine />
-                                            Ownership
+                                            <span>Owners</span>
                                         </Button>
                                     </div>
                                     <div className="hidden lg:inline-block">
@@ -271,7 +241,7 @@ export default function PostPage() {
                                                 <AvatarImage src={post.user.image} alt="Creator" />
                                                 <AvatarFallback className="text-green-500">{post.user.name[0]}</AvatarFallback>
                                             </Avatar>
-                                            <span>Created by</span><span className="font-semibold text-white">{post.user.name}</span>
+                                            <span>Created by</span><span className="font-semibold dark:text-white text-black">{post.user.name}</span>
                                             <span>•</span>
                                             <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</span>
                                         </div>
@@ -297,7 +267,7 @@ export default function PostPage() {
 
                         </div>
                     </div>
-                </div> // Show actual post content once loading is complete
+                </div>
             )}
 
             <div>

@@ -11,7 +11,7 @@ import { SendHorizonal, ChevronDown, ChevronUp } from "lucide-react";
 import { RiHeartFill, RiHeartLine, RiVerifiedBadgeFill } from "@remixicon/react";
 import { getPostComments, createComment, createReply, likeComment, likeCommentReply } from "@/Store/Post";
 import { getUser } from "@/utils/storage";
-import { Comment, ReplyType } from "@/types/Comment"; // Import Comment type
+import { Comment, ReplyType } from "@/Types/Comment"; // Import Comment type
 import { useNavigate } from "react-router-dom";
 import { CommentSkeleton } from "./Skeleton/Comment";
 
@@ -28,6 +28,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
     const [error, setError] = useState<string | null>(null);
     const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({}); // Track expanded comments
     const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const Navigate = useNavigate();
 
     const data = getUser();
@@ -37,13 +38,12 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
         const fetchPostComment = async () => {
             try {
                 if (!postId) return;
-                setLoading(true)
                 const data = await getPostComments(postId);
                 setComments(data);
             } catch (err) {
                 setError("Failed to fetch post comments");
             } finally {
-                setLoading(false)
+                setIsLoading(false)
             }
         };
         fetchPostComment();
@@ -246,9 +246,8 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
         <div className="relative flex flex-col h-[450px]">
             {/* Comments Section (Top) */}
             <div className="flex-1 overflow-y-auto space-y-2">
-                {loading ? (
+                {isLoading ? (
                     <>
-                        <CommentSkeleton />
                         <CommentSkeleton />
                     </>
 
@@ -256,7 +255,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                     <div className="flex items-center justify-center h-full text-gray-400">No Comments Yet</div>
                 ) : (
                     comments.map((comment) => (
-                        <div key={comment.id} className="flex items-start gap-4 p-4 bg-[#050c1c] border shadow rounded-lg">
+                        <div key={comment.id} className="flex items-start gap-4 p-4 dark:bg-[#050c1c] bg-white border shadow rounded-lg">
                             <Avatar className="w-10 h-10 border-2 border-gray-700 cursor-pointer">
                                 <AvatarImage src={comment.user.image} alt={comment.user.name} />
                                 <AvatarFallback>
@@ -269,7 +268,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                             </Avatar>
                             <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <h4 className="text-sm font-semibold text-gray-100">
+                                    <h4 className="text-sm font-semibold ">
                                         {(() => {
                                             const words = comment.user.name.split(" ");
                                             const firstWord = words[0] || "";
@@ -289,7 +288,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                                     )}
                                     <span className="text-xs text-gray-400">• {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
                                 </div>
-                                <p className="text-sm text-gray-300 leading-relaxed">{comment.content}</p>
+                                <p className="text-sm dark:text-gray-300 leading-relaxed">{comment.content}</p>
 
                                 <div className="flex gap-3">
 
@@ -301,7 +300,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                                         {data?.user?.id && comment?.likes?.includes(data.user.id) ? (
                                             <RiHeartFill className="w-4 h-4 text-red-500" />
                                         ) : (
-                                            <RiHeartLine className="w-4 h-4 text-gray-400" />
+                                            <RiHeartLine className="w-4 h-4 dark:text-gray-400 text-gray-600" />
                                         )}
                                         <span className={data?.user?.id && comment?.likes?.includes(data.user.id) ? "text-red-500" : "text-gray-400"}>
                                             {comment.likes.length}
@@ -312,7 +311,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                                     <div className="flex items-center gap-4 mt-2">
                                         <button
                                             onClick={() => handleReplyClick(comment.user.name, comment.id)} // Show reply input for this comment
-                                            className="text-sm text-gray-400 hover:text-gray-200 transition-colors cursor-pointer"
+                                            className="text-sm dark:text-gray-400 hover:text-gray-200 transition-colors cursor-pointer"
                                         >
                                             Reply
                                         </button>
@@ -321,7 +320,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
 
                                 {/* Replies Section */}
                                 {comment.replies && comment.replies.length > 0 && (
-                                    <div className="mt-4 lg:pl-10 lg:border-l border-gray-700">
+                                    <div className="mt-4 lg:pl-10 lg:border-l dark:border-gray-700 border-gray-300">
                                         {(expandedComments[comment.id]
                                             ? comment.replies
                                             : comment.replies.slice(0, 3) // Show only 3 replies initially
@@ -339,7 +338,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                                                 </Avatar>
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <h4 className="text-sm font-semibold text-gray-100">
+                                                        <h4 className="text-sm font-semibold ">
                                                             {(() => {
                                                                 const words = reply.user.name.split(" ");
                                                                 const firstWord = words[0] || "";
@@ -359,7 +358,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                                                         )}
                                                         <span className="text-xs text-gray-400">• {formatDistanceToNow(new Date(reply.createdAt), { addSuffix: true })}</span>
                                                     </div>
-                                                    <p className="text-sm text-gray-300 leading-relaxed">
+                                                    <p className="text-sm dark:text-gray-300 leading-relaxed">
                                                         {reply.content.split(" ").map((word, index) =>
                                                             word.startsWith("@") ? (
                                                                 <span key={index} className="font-bold text-blue-500">
@@ -380,7 +379,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                                                             {data?.user?.id && reply?.likes?.includes(data.user.id) ? (
                                                                 <RiHeartFill className="w-4 h-4 text-red-500" /> // Filled heart if liked
                                                             ) : (
-                                                                <RiHeartLine className="w-4 h-4 text-gray-400" /> // Outline heart if not liked
+                                                                <RiHeartLine className="w-4 h-4 dark:text-gray-400 text-gray-600" /> // Outline heart if not liked
                                                             )}
                                                             <span className={data?.user?.id && reply?.likes?.includes(data.user.id) ? "text-red-500" : "text-gray-400"}>
                                                                 {reply.likes.length} {/* Display like count */}
@@ -430,7 +429,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
 
             {/* Input Box (Fixed at Bottom) */}
             <div className="sticky bottom-0 pt-2">
-                <Card className="px-1 py-3 lg:p-3 bg-[#050c1c]">
+                <Card className="px-1 py-3 lg:p-3 dark:bg-[#050c1c] bg-white">
                     <CardContent className="flex items-center gap-3">
                         <Avatar className="hidden lg:block">
                             <AvatarImage src={postUserImage} alt="User" />
@@ -446,7 +445,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                         {/* Input Field */}
                         <Input
                             placeholder="Write a comment..."
-                            className="bg-black flex-1 rounded-full px-4 py-2 border focus:border-blue-500 focus:ring focus:ring-blue-200 transition"
+                            className="dark:bg-black bg-gray-300 flex-1 rounded-full px-4 py-2 border focus:border-blue-500 focus:ring focus:ring-blue-200 transition"
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
                         />

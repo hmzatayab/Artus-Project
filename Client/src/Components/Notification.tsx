@@ -4,24 +4,10 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "./ui/button";
-
-interface Notification {
-    id: string;
-    message: string;
-    sender: {
-        image: string;
-    };
-    isRead: boolean;
-    createdAt: string;
-}
-
-interface NotificationDropdownProps {
-    notifications: Notification[];
-}
+import { NotificationDropdownProps } from "@/Types/Notification";
 
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notifications }) => {
     return (
-
         <DropdownMenu>
             <DropdownMenuTrigger>
                 <div className="relative cursor-pointer">
@@ -35,8 +21,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notificatio
                     )}
                 </div>
             </DropdownMenuTrigger>
-
-
             <DropdownMenuContent className="w-96 max-h-[500px] overflow-hidden overflow-y-auto no-scrollbar mt-2 dark:shadow-lg dark:shadow-gray-700/50 shadow-lg shadow-gray-700/50">
                 {notifications.length > 0 && (
                     <div>
@@ -49,7 +33,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notificatio
                         <DropdownMenuSeparator />
                     </div>
                 )}
-
                 {notifications.length > 0 ? (
                     notifications
                         .slice() // Original array ko mutate na karne ke liye copy bana rahe hain
@@ -92,10 +75,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notificatio
                     <DropdownMenuItem className="cursor-pointer">No notifications</DropdownMenuItem>
                 )}
             </DropdownMenuContent>
-
         </DropdownMenu>
-
-
     );
 };
 

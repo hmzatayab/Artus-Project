@@ -72,7 +72,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                                         }
                                     })()}
                                 </h3>
-                                {post.user?.identityVerified && (
+                                {post.user.identityVerified && (
                                     <div>
                                         <HoverCard>
                                             <HoverCardTrigger>

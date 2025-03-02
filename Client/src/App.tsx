@@ -7,6 +7,8 @@ import Header from "./components/Header";
 import Dashboard from "./Pages/Dashboard";
 import Followers from "./Pages/Followers";
 import Post from "./Pages/Post";
+import NotFound from "./components/NotFound404";
+import Wallet from "./Pages/Wallet";
 
 function App() {
   return (
@@ -37,6 +39,9 @@ function MainLayout() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/Followers" element={<Followers />} />
         <Route path="/post/:postId" element={<Post/>}/>
+        <Route path="/wallet" element={<Wallet/>}/>
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

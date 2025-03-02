@@ -9,6 +9,7 @@ import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 import { uploadImage } from "@/Store/User";
 import { Checkbox } from "./ui/checkbox";
+import LoadingIcon from "@/utils/Loading";
 
 const UploadDrawer: React.FC = () => {
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -21,37 +22,32 @@ const UploadDrawer: React.FC = () => {
 
     const token = localStorage.getItem("userToken");
 
-    // Handle image upload
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Check image dimensions and aspect ratio
         const img = new Image();
         img.src = URL.createObjectURL(file);
 
         img.onload = () => {
             const { width, height } = img;
 
-            // Check dimensions
             if (
                 !(
-                    (width === 1080 && height === 1920) || // 1080x1920 px
-                    (width === 720 && height === 1280) // 720x1280 px
+                    (width === 1080 && height === 1920) ||
+                    (width === 720 && height === 1280) 
                 )
             ) {
                 toast("Image size must be 1080x1920 px or 720x1280 px.");
                 return;
             }
 
-            // Check aspect ratio (9:16)
             const aspectRatio = width / height;
             if (Math.abs(aspectRatio - 9 / 16) > 0.01) {
                 toast("Image aspect ratio must be 9:16.");
                 return;
             }
 
-            // If everything is valid, set the image file
             setImageFile(file);
         };
 
@@ -60,7 +56,6 @@ const UploadDrawer: React.FC = () => {
         };
     };
 
-    // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -70,15 +65,13 @@ const UploadDrawer: React.FC = () => {
             return;
         }
 
-        // Title validation
         if (title.length < 15 || title.length > 25) {
             toast("Title must be between 15 and 25 characters");
             setLoading(false);
             return;
         }
 
-        // Description validation (Character count: Min 100, Max 250)
-        const descriptionCharCount = description.length; // Count characters in description
+        const descriptionCharCount = description.length; 
         if (descriptionCharCount < 100) {
             toast("Description must be at least 100 characters");
             setLoading(false);
@@ -90,13 +83,12 @@ const UploadDrawer: React.FC = () => {
             return;
         }
 
-        // Tags validation
-        const tagsArray = tags
-            .split(",") // Split by commas
-            .map((tag) => tag.trim()) // Trim spaces
-            .filter((tag) => tag !== ""); // Remove empty tags
 
-        // Validate tag count (min 3 tags, max 10 tags)
+        const tagsArray = tags
+            .split(",") 
+            .map((tag) => tag.trim()) 
+            .filter((tag) => tag !== ""); 
+
         if (tagsArray.length < 3) {
             toast("You must add at least 3 tags");
             setLoading(false);
@@ -114,7 +106,6 @@ const UploadDrawer: React.FC = () => {
             return;
         }
 
-        // Validate each tag length (min 3, max 15 characters)
         for (let tag of tagsArray) {
             if (tag.length < 3 || tag.length > 15) {
                 toast("Each tag must be between 3 and 15 characters");
@@ -136,26 +127,23 @@ const UploadDrawer: React.FC = () => {
                 return;
             }
 
-            // Use the uploadImage function from the store
             const response = await uploadImage(formData, token);
 
             if (response) {
                 toast("Image uploaded successfully!");
                 setLoading(false);
-                navigate("/"); // Redirect after upload
+                navigate("/"); 
             }
         } catch (error) {
             toast("An error occurred while uploading the image.");
         }
 
-        // Reset form fields
         setImageFile(null);
         setTitle("");
         setDescription("");
         setTags("");
     };
 
-    // Handle image removal
     const removeImage = () => {
         setImageFile(null);
     };
@@ -198,6 +186,7 @@ const UploadDrawer: React.FC = () => {
                                     </p>
                                     <p className="text-xs text-gray-400">SVG, PNG, or JPG (Ratio 9:16, Size 1080x1920 px)</p>
                                 </div>
+                                
                                 <input
                                     id="dropzone-file"
                                     type="file"
@@ -277,22 +266,7 @@ const UploadDrawer: React.FC = () => {
                                 {/* Upload */}
                                 {loading ? (
                                     <div role="status" className="flex items-center gap-2">
-                                        <svg
-                                            aria-hidden="true"
-                                            className="w-5 h-5 text-gray-200 animate-spin dark:text-gray-600 fill-white"
-                                            viewBox="0 0 100 101"
-                                            fill="none"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <path
-                                                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                                                fill="currentColor"
-                                            />
-                                            <path
-                                                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                                                fill="currentFill"
-                                            />
-                                        </svg>
+                                        <LoadingIcon></LoadingIcon>
                                         <span>Uploading...</span>
                                     </div>
                                 ) : (

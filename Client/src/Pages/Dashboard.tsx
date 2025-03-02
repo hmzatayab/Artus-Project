@@ -1,12 +1,24 @@
 import { Card } from "@/components/ui/card"
 import { Link } from "react-router-dom"
-import { RiCameraLine } from "@remixicon/react";
+import { RiBookmarkFill, RiCameraLine, RiLayoutGridFill, RiLineChartLine, RiTrophyFill, RiVerifiedBadgeFill } from "@remixicon/react";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
 import PostCard from "@/components/PostCard";
+import { toast } from "sonner"
 import { getUserPosts } from "@/Store/Post";
 import { getUser } from "@/utils/storage";
+import { PostCardSkeleton } from "@/components/Skeleton/PostCard";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { CalendarIcon } from "lucide-react";
+import { ChartComponent } from "@/components/Analytics/ChartForViews"
+
+const menuOptions = [
+  { name: "All Posts", icon: <RiLayoutGridFill size={20} /> },
+  { name: "Auctions", icon: <RiTrophyFill size={20} /> },
+  { name: "Wishlist", icon: <RiBookmarkFill size={20} /> },
+  { name: "Analytics", icon: <RiLineChartLine size={20} /> },
+];
 
 
 function Profile() {
@@ -22,8 +34,8 @@ function Profile() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const data = await getUserPosts(userId); // API Call
-        setPosts(data); // Save posts in state
+        const data = await getUserPosts(userId);
+        setPosts(data);
       } catch (err) {
         setError("Failed to fetch posts");
       } finally {
@@ -31,45 +43,10 @@ function Profile() {
       }
     };
 
-    fetchPosts(); // Call function on component mount
+    fetchPosts();
   }, []);
 
-  if (loading) return <p>Loading posts...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
-
-  // const [posts, setPosts] = useState([]);
-
-  // useEffect(() => {
-  //     let filteredPosts = [];
-
-  //     if (selectedTab === "All Posts") {
-  //       filteredPosts = allPosts;
-  //     } else if (selectedTab === "Win Auctions") {
-  //       filteredPosts = allPosts.filter((post) => post.status === "win");
-  //     } else if (selectedTab === "Lost Auctions") {
-  //       filteredPosts = allPosts.filter((post) => post.status === "lost");
-  //     } else if (selectedTab === "Liked Posts") {
-  //       filteredPosts = allPosts.filter((post) => post.isLiked === true);
-  //     }
-
-  //     setPosts(filteredPosts);
-  //   }, [selectedTab, allPosts]);
-
-
-
-  const menuOptions = [
-    "All Posts",
-    "Win Auctions",
-    "Lost Auctions",
-    "Liked Posts",
-  ];
-
-  // const postsData = {
-  //   "All Posts": ["Post 1", "Post 2", "Post 3", "Post 4", "Post 5", "Post 6"],
-  //   "Win Auctions": ["Win Auction Post 1", "Win Auction Post 2"],
-  //   "Lost Auctions": ["Lost Auction Post 1", "Lost Auction Post 2"],
-  //   "Liked Posts": ["Liked Post 1", "Liked Post 2"],
-  // };
+  if (error) return toast(`${error}`);
 
   return (
     <>
@@ -81,11 +58,11 @@ function Profile() {
         {/* User Info */}
         <div className="flex flex-col lg:flex-row items-center space-y-6 lg:space-y-0 lg:space-x-8 w-full lg:w-1/2">
           {/* Profile Picture with Gradient Border */}
-          <div className="relative w-24 h-24 md:w-32 md:h-32">
+          <div className="relative w-32 h-32">
             <div>
-              <Avatar className="w-full h-full outline-3 border-4 dark:border-gray-950 border-white outline-green-500">
-                <AvatarImage src="https://cdn.lazyshop.com/files/9b0d8bde-34c0-460a-b131-e7a87b1e0543/product/914f3782cdb5d17a3a6a0b24d2cf0b97.jpeg" alt="User Profile" />
-                <AvatarFallback>AB</AvatarFallback>
+              <Avatar className="w-32 h-32 outline-3 border-4 dark:border-gray-950 border-white outline-green-500">
+                <AvatarImage src={data.user.image} alt="User Profile" />
+                <AvatarFallback className="text-3xl text-green-500">AB</AvatarFallback>
               </Avatar>
             </div>
             {/* Hover Effect for Profile Picture */}
@@ -99,7 +76,34 @@ function Profile() {
           {/* User Details */}
           <div className="text-center lg:text-left">
             <div className="flex items-center justify-center lg:justify-start">
-              <h1 className="text-3xl md:text-4xl font-bold ">Hamza Tayyab</h1>
+              <div className="flex items-center space-x-1">
+                <h1 className="text-3xl md:text-4xl font-bold ">{data.user.name || "Anonymous"}</h1>
+                {data.user.identityVerified && (
+                  <div>
+                    <HoverCard>
+                      <HoverCardTrigger>
+                        <RiVerifiedBadgeFill size={20} color="#089dea" />
+                      </HoverCardTrigger>
+                      <HoverCardContent>
+                        <div className="flex justify-between space-x-4">
+                          <div className="space-y-1">
+                            <h4 className="text-sm font-semibold">@{data.user.username}</h4>
+                            <p className="text-sm">
+                              The React Framework – created and maintained by @vercel.
+                            </p>
+                            <div className="flex items-center pt-2">
+                              <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
+                              <span className="text-xs text-muted-foreground">
+                                Joined December 2021
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  </div>
+                )}
+              </div>
               <Link
                 to={"/update"}
                 state={{ from: "dashboard" }}
@@ -109,12 +113,12 @@ function Profile() {
                 {/* <i className="ri-edit-2-fill text-white text-2xl"></i> */}
               </Link>
             </div>
-            <p className="text-xs md:text-sm  italic mt-2">Hamza@gmail.com</p>
+            <p className="text-xs md:text-sm  italic mt-2">{data.user.email || "example@gmail.com"}</p>
 
             {/* Bio Section */}
             <div className="mt-4 max-w-md">
               <p className="text-sm">
-                Add a bio to tell people more about yourself.
+                {data.user.bio || "No Bio Available"}
               </p>
             </div>
           </div>
@@ -126,118 +130,94 @@ function Profile() {
 
         {/* Stats Section */}
         <div className="flex flex-wrap gap-3 justify-center w-full">
-          {[
-            { count: "23.3k", label: "Followers" },
-            { count: "15.8k", label: "Following" },
-            { count: "120", label: "Posts" },
-            { count: "5", label: "Auctions" },
-            { count: "5", label: "Balance" },
-          ].map((item, index) => (
-            <div key={index} className="cursor-pointer w-36 md:w-48 h-24 md:h-32 flex flex-col justify-center items-center dark:bg-white/5 bg-gray-200 backdrop-blur-xl rounded-xl shadow-lg p-4 hover:bg-white/20 transition-all duration-300">
-              <span className="text-3xl md:text-4xl font-bold ">{item.count}</span>
-              <span className="text-xs md:text-sm dark:text-gray-400">{item.label}</span>
+          <div className="cursor-pointer w-36 md:w-48 h-24 md:h-32 flex flex-col justify-center items-center dark:bg-white/5 bg-gray-200 backdrop-blur-xl rounded-xl shadow-lg p-4 hover:bg-white/20 transition-all duration-300">
+            <span className="text-3xl md:text-4xl font-bold ">23.1k</span>
+            <span className="text-xs md:text-sm dark:text-gray-400">Followers</span>
+          </div>
+          <div className="cursor-pointer w-36 md:w-48 h-24 md:h-32 flex flex-col justify-center items-center dark:bg-white/5 bg-gray-200 backdrop-blur-xl rounded-xl shadow-lg p-4 hover:bg-white/20 transition-all duration-300">
+            <span className="text-3xl md:text-4xl font-bold ">23.1k</span>
+            <span className="text-xs md:text-sm dark:text-gray-400">Followings</span>
+          </div>
+          <div className="cursor-pointer w-36 md:w-48 h-24 md:h-32 flex flex-col justify-center items-center dark:bg-white/5 bg-gray-200 backdrop-blur-xl rounded-xl shadow-lg p-4 hover:bg-white/20 transition-all duration-300">
+            <span className="text-3xl md:text-4xl font-bold ">23.1k</span>
+            <span className="text-xs md:text-sm dark:text-gray-400">Auctions</span>
+          </div>
+          <div className="cursor-pointer w-36 md:w-48 h-24 md:h-32 flex flex-col justify-center items-center dark:bg-white/5 bg-gray-200 backdrop-blur-xl rounded-xl shadow-lg p-4 hover:bg-white/20 transition-all duration-300">
+            <span className="text-3xl md:text-4xl font-bold ">23.1k</span>
+            <span className="text-xs md:text-sm dark:text-gray-400">Likes</span>
+          </div>
+          <Link to={"/wallet"}>
+            <div className="cursor-pointer w-36 md:w-48 h-24 md:h-32 flex flex-col justify-center items-center dark:bg-white/5 bg-gray-200 backdrop-blur-xl rounded-xl shadow-lg p-4 hover:bg-white/20 transition-all duration-300">
+              <span className="text-3xl md:text-4xl font-bold ">Wallet</span>
+              <span className="text-xs md:text-sm dark:text-gray-400">Balance <span className="font-bold text-blue-500">23.1k</span></span>
             </div>
-          ))}
+          </Link>
         </div>
       </Card>
 
       {/* Menu Card */}
-      <Card className="mt-4 mx-5 lg:mx-8 p-2 rounded-2xl">
-        <div className="flex justify-between gap-3">
-          {menuOptions.map((option) => (
-            <div
-              key={option}
-              className={`cursor-pointer h-10 flex justify-center items-center rounded-xl px-6 transition-all duration-300 ${selectedTab === option ? "bg-white/10 w-full" : "hover:bg-white/20 w-full"
-                }`}
-              onClick={() => setSelectedTab(option)}
-            >
-              <span className="font-medium">{option}</span>
+
+      <div>
+        <div>
+          <Card className="mt-4 mx-5 lg:mx-8 p-2 rounded-2xl dark:bg-black bg-gray-200">
+            <div className="flex justify-between gap-3">
+              {menuOptions.map((option, index) => (
+                <div
+                  key={index}
+                  className={`cursor-pointer h-10 flex justify-center items-center rounded-xl px-6 transition-all duration-300 ${selectedTab === option.name ? "dark:bg-white/10 w-full bg-gray-300" : ":dark:hover:bg-white/20 w-full hover:bg-white dark:hover:text-black"
+                    }`}
+                  onClick={() => setSelectedTab(option.name)}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <span>{option.icon}</span>
+                    <span className="font-medium hidden lg:inline-block"> {option.name}</span>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </Card>
         </div>
-      </Card>
 
+        {selectedTab === "All Posts" ? (
+          <div className=" lg:mx-8 lg:mt-4 mb-8 p-5 lg:p-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {loading ? (
+                <>
+                  <PostCardSkeleton />
+                  <PostCardSkeleton />
+                  <PostCardSkeleton />
+                  <PostCardSkeleton />
+                </>
+              ) : (
+                <>
+                  {posts.map((post, index) => (
+                    <PostCard key={index} post={post} />
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+        ) : selectedTab === "Auctions" ? (
+          <div>
+            <div className="lg:mx-8 mt-4 mb-8">Auctions Posts</div>
+          </div>
+        ) : selectedTab === "Wishlist" ? (
+          <div>
+            <div className="lg:mx-8 mt-4 mb-8">Like Posts</div>
+          </div>
+        ) : selectedTab === "Analytics" ? (
+          <div>
+            {/* <div className="lg:mx-8 mt-4 mb-8">Lost Auction Posts</div> */}
+            <div className="lg:mx-8 mt-4 mb-8 p-5 lg:p-0">
+              <ChartComponent />
+            </div>
+          </div>
+        ) : null}
 
-      <div className=" lg:mx-8 mt-4 mb-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {posts.map((post, index) => (
-            <PostCard key={index} post={post} />
-          ))}
-        </div>
       </div>
+
     </>
   )
 }
 
 export default Profile
-
-
-
-
-
-// import { useState, useEffect } from "react";
-// import { Card } from "@/components/ui/card";
-// import PostCard from "./PostCard"; // Ensure correct import
-
-// function Profile({ allPosts }) {
-//   const [selectedTab, setSelectedTab] = useState("All Posts");
-//   const [posts, setPosts] = useState([]); // Initially empty
-
-//   const menuOptions = [
-//     "All Posts",
-//     "Win Auctions",
-//     "Lost Auctions",
-//     "Liked Posts",
-//   ];
-
-//   // Function to filter posts based on selected tab
-//   useEffect(() => {
-//     let filteredPosts = [];
-
-//     if (selectedTab === "All Posts") {
-//       filteredPosts = allPosts;
-//     } else if (selectedTab === "Win Auctions") {
-//       filteredPosts = allPosts.filter((post) => post.status === "win");
-//     } else if (selectedTab === "Lost Auctions") {
-//       filteredPosts = allPosts.filter((post) => post.status === "lost");
-//     } else if (selectedTab === "Liked Posts") {
-//       filteredPosts = allPosts.filter((post) => post.isLiked === true);
-//     }
-
-//     setPosts(filteredPosts);
-//   }, [selectedTab, allPosts]);
-
-//   return (
-//     <>
-//       {/* Menu Section */}
-//       <Card className="mt-4 mx-5 lg:mx-8 p-2 rounded-2xl">
-//         <div className="flex justify-between gap-3">
-//           {menuOptions.map((option) => (
-//             <div
-//               key={option}
-//               className={`cursor-pointer h-10 flex justify-center items-center rounded-xl px-6 transition-all duration-300 ${
-//                 selectedTab === option ? "bg-white/10 w-full" : "hover:bg-white/20 w-full"
-//               }`}
-//               onClick={() => setSelectedTab(option)}
-//             >
-//               <span className="font-medium">{option}</span>
-//             </div>
-//           ))}
-//         </div>
-//       </Card>
-
-//       {/* Posts Section */}
-//       <div className="lg:mx-8 mt-4 mb-8">
-//         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-//           {posts.length > 0 ? (
-//             posts.map((post) => <PostCard key={post._id} post={post} />)
-//           ) : (
-//             <p className="text-center col-span-full text-gray-500">No posts found.</p>
-//           )}
-//         </div>
-//       </div>
-//     </>
-//   );
-// }
-
-// export default Profile;
