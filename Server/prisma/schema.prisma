@@ -160,8 +160,8 @@ model Transaction {
   walletId      String   @db.ObjectId
   type          String // 'deposit', 'withdraw', 'transfer'
   amount        Float
-  transactionId String   @unique
-  invoiceId     String   @unique
+  transactionId String   @unique 
+  invoiceId     String   @unique 
   fromUserId    String?  @db.ObjectId
   toUserId      String?  @db.ObjectId
   status        String // 'success', 'failed', 'pending'

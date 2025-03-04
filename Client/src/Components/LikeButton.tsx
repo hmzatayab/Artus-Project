@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { likePost } from "@/Store/Post";
+import { likePost } from "@/APIs/Post";
 import { Button } from "@/components/ui/button";
 import { RiHeartLine, RiHeartFill } from "@remixicon/react";
 import { toast } from "sonner";

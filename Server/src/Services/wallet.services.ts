@@ -1,5 +1,5 @@
 import prisma from "../config/DB";
-import { generateRandomId } from "../utils/generateId";
+import { generateInvoiceId, generateTransactionId } from "../utils/generateId";
 
 export const depositFunds = async (userId: string, amount: number) => {
   const user = await prisma.user.findUnique({
@@ -50,8 +50,8 @@ export const depositFunds = async (userId: string, amount: number) => {
             type: "deposit",
             amount,
             status: "success",
-            transactionId: generateRandomId(12),
-            invoiceId: generateRandomId(6),
+            transactionId: generateTransactionId(),
+            invoiceId: generateInvoiceId(),
           },
         },
       },
@@ -74,8 +74,8 @@ export const depositFunds = async (userId: string, amount: number) => {
         type: "deposit",
         amount,
         status: "failed",
-        transactionId: generateRandomId(12),
-        invoiceId: generateRandomId(6),
+        transactionId: generateTransactionId(),
+        invoiceId: generateInvoiceId(),
       },
     });
 
@@ -148,8 +148,8 @@ export const withdrawFunds = async (userId: string, amount: number) => {
         type: "withdraw",
         amount,
         status: "failed",
-        transactionId: generateRandomId(12),
-        invoiceId: generateRandomId(6),
+        transactionId: generateTransactionId(),
+        invoiceId: generateInvoiceId(),
       },
     });
 
@@ -186,8 +186,8 @@ export const withdrawFunds = async (userId: string, amount: number) => {
             type: "withdraw",
             amount,
             status: "success",
-            transactionId: generateRandomId(12),
-            invoiceId: generateRandomId(6),
+            transactionId: generateTransactionId(),
+            invoiceId: generateInvoiceId(),
           },
         },
       },
@@ -210,8 +210,8 @@ export const withdrawFunds = async (userId: string, amount: number) => {
         type: "withdraw",
         amount,
         status: "failed",
-        transactionId: generateRandomId(12),
-        invoiceId: generateRandomId(6),
+        transactionId: generateTransactionId(),
+        invoiceId: generateInvoiceId(),
       },
     });
 
@@ -319,8 +319,8 @@ export const transferFunds = async (
         type: "transfer",
         amount,
         status: "failed",
-        transactionId: generateRandomId(12),
-        invoiceId: generateRandomId(6),
+        transactionId: generateTransactionId(),
+        invoiceId: generateInvoiceId(),
       },
     });
 
@@ -377,8 +377,8 @@ export const transferFunds = async (
             amount,
             toUserId: receiverId,
             status: "success",
-            transactionId: generateRandomId(12),
-            invoiceId: generateRandomId(6),
+            transactionId: generateTransactionId(),
+            invoiceId: generateInvoiceId(),
           },
         },
       },
@@ -393,8 +393,8 @@ export const transferFunds = async (
             amount,
             fromUserId: senderId,
             status: "success",
-            transactionId: generateRandomId(12),
-            invoiceId: generateRandomId(6),
+            transactionId: generateTransactionId(),
+            invoiceId: generateInvoiceId(),
           },
         },
       },

@@ -1,44 +1,25 @@
 "use client";
 
+import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { CalendarIcon } from "lucide-react";
+import { getAllPost, getPost } from "@/APIs/Post";
+import { formatDistanceToNow } from "date-fns";
+import { getUser } from "@/utils/storage";
+import { toast } from "sonner"
+import { Post } from "@/Types/Post"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getAllPosts, getPost } from "@/Store/Post";
 import { RiBookmarkLine, RiChat1Line, RiGroupLine, RiMore2Fill, RiUserStarLine, RiVerifiedBadgeFill } from "@remixicon/react";
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { CalendarIcon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import LikeButton from "@/components/LikeButton";
-import { toast } from "sonner"
-import { getUser } from "@/utils/storage";
 import PostCard from "@/components/PostCard";
 import CommentCard from "@/components/Comment";
 import { PostSkeleton } from "@/components/Skeleton/Post";
 import { PostCardSkeleton } from "@/components/Skeleton/PostCard";
-import { Post } from "@/Types/Post"
 
-// type Post = {
-//     id: string;
-//     imageURL: string;
-//     isLive: boolean;
-//     title: string;
-//     description: string;
-//     tags: string[];
-//     createdAt: string;
-//     user: {
-//         id: string;
-//         name: string;
-//         username: string;
-//         image: string;
-//         followers: number[];
-//         identityVerified: boolean;
-//     };
-//     likes: number[];
-//     comments: {}[];
-// };
 
 export default function PostPage() {
     const { postId } = useParams();
@@ -50,7 +31,6 @@ export default function PostPage() {
 
     const data = getUser();
 
-    // Fetch post details
     useEffect(() => {
         const fetchPost = async () => {
             try {
@@ -64,13 +44,11 @@ export default function PostPage() {
         fetchPost();
     }, [postId]);
 
-
-    // Fetch all posts
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const data = await getAllPosts();
-                setPosts(data);
+                const data = await getAllPost();
+                setPosts(data.posts);
             } catch (err) {
                 setError("Failed to fetch posts");
             } finally {
@@ -79,7 +57,6 @@ export default function PostPage() {
         };
         fetchPosts();
     }, []);
-
 
     if (error) return toast(`${error}`);
 
@@ -153,23 +130,17 @@ export default function PostPage() {
                                         <Button variant="outline" className="bg-transparent border-gray-700 cursor-pointer">
                                             Follow
                                         </Button>
-
                                     </div>
                                 </div>
 
                                 <div>
-
-
-
-
-
-
                                     <DropdownMenu>
                                         <DropdownMenuTrigger>
                                             <RiMore2Fill className="cursor-pointer" />
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
                                             <DropdownMenuItem className="cursor-pointer"><Link to={'/'}>Report</Link></DropdownMenuItem>
+                                            <DropdownMenuItem className="cursor-pointer"><Link to={'/'}>Edit</Link></DropdownMenuItem>
                                             <DropdownMenuItem className="cursor-pointer">Copy link</DropdownMenuItem>
                                             <DropdownMenuItem
                                                 className="text-red-500 cursor-pointer"
@@ -178,9 +149,6 @@ export default function PostPage() {
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
-
-
-
                                 </div>
 
                             </div>
@@ -247,7 +215,6 @@ export default function PostPage() {
                                         </div>
                                     </div>
                                 </div>
-
 
 
                                 {activeTab === "comments" ? (

@@ -47,12 +47,14 @@ export const transferFunds = async (req: Request, res: Response) => {
   const { receiverId, amount } = req.body;
   const senderId = (req as any).user?.userId;
 
-  if (!senderId)
+  if (!senderId) {
     res.status(401).json({ success: false, message: "Unauthorized" });
-  if (!receiverId || !amount) {
-    res
-      .status(400)
-      .json({ success: false, message: "Receiver ID and amount are required" });
+    return;
+  }
+
+  if (!amount || !receiverId) {
+    res.status(400).json({ message: "Receiver ID and amount are required" });
+    return;
   }
 
   try {
@@ -61,9 +63,9 @@ export const transferFunds = async (req: Request, res: Response) => {
       receiverId,
       amount
     );
-    res.status(200).json({ success: true, result });
+    res.status(200).json({ success: true, result }); // ✅ Ensure return is here
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message }); // ✅ Ensure return is here
   }
 };
 
@@ -196,5 +198,35 @@ export const deleteWallet = async (req: Request, res: Response) => {
     return;
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getWallet = async (req: Request, res: Response) => {
+  const userId = (req as any).user?.userId;
+
+  if (!userId) {
+    res.status(400).json({ success: false, message: "User ID is required" });
+    return;
+  }
+
+  try {
+    const wallet = await prisma.wallet.findUnique({
+      where: { userId },
+    });
+
+    if (!wallet) {
+      res.status(404).json({
+        success: false,
+        message: "Wallet not found",
+      });
+      return;
+    }
+
+    res.status(200).json({ success: true, wallet });
+  } catch (error: any) {
+    // ✅ Ensure response is not sent again
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, message: error.message });
+    }
   }
 };

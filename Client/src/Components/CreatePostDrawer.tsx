@@ -7,7 +7,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
-import { uploadImage } from "@/Store/User";
+import { uploadImage } from "@/APIs/User";
 import { Checkbox } from "./ui/checkbox";
 import LoadingIcon from "@/utils/Loading";
 

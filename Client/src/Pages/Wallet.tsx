@@ -5,11 +5,38 @@ import { formatDistanceToNow } from "date-fns";
 import { ChartComponent } from "@/components/Analytics/ChartForViews";
 import { Card } from "@/components/ui/card"; // Shadcn Card
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; // Shadcn Avatar
-import { TransactionHistorySkeleton } from "@/components/Skeleton/Transactions";
+import { DepositDrawer } from "@/components/Wallet/Deposit";
+import { useEffect, useState } from "react";
+import { getUser } from "@/utils/storage";
+import { getWallet } from "@/APIs/Wallet";
+import { Switch } from "@/components/ui/switch";
+// import { TransactionHistorySkeleton } from "@/components/Skeleton/Transactions";
+import type { Wallet } from "@/Types/Wallet";
+import { WithdrawDrawer } from "@/components/Wallet/Withdraw";
+import { TransferDrawer } from "@/components/Wallet/Transfer";
 
 function Wallet() {
+    const [wallet, setWallet] = useState<Wallet | null>(null);
+    const [isActive, setIsActive] = useState(true);
+    const User = getUser().user;
+
+
+
+    useEffect(() => {
+        const fetchWallet = async () => {
+            try {
+                const token = getUser().token;
+                const data = await getWallet(token);
+                setWallet(data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        fetchWallet();
+    }, [])
     // Dummy Data
-    const balance = 1500; // Total Balance
+   
     const transactionHistory = [
         {
             _id: "1",
@@ -56,7 +83,32 @@ function Wallet() {
     ];
 
     return (
-        <div className="mt-20 text-white flex flex-col items-center py-5 px-4">
+        <div className="mt-20 text-white flex flex-col  py-5 px-4">
+            <Card className="relative w-full p-6  text-white shadow-lg rounded-2xl overflow-hidden mb-4">
+                {/* Glowing Effect */}
+                <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-indigo-500 to-cyan-500 opacity-20 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-20 rounded-full blur-3xl"></div>
+
+                {/* Card Content */}
+                <div className="flex justify-between items-center">
+                    {/* Left: Toggle Button */}
+                    <div className="">
+                        <p className="text-4xl font-light">Hi<span className="font-bold ml-2">{User.name}</span></p>
+                        <p className="text-sm text-gray-400 italic"><span className="font-bold">Wallet ID</span> #{wallet?.wallet ? wallet.wallet.walletId : "Loading..."}
+                        </p>
+                    </div>
+
+                    {/* Right: User Info */}
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            checked={isActive}
+                            onCheckedChange={setIsActive}
+                            className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-500"
+                        />
+                        <span className="text-sm text-gray-400">{isActive ? "Active" : "Inactive"}</span>
+                    </div>
+                </div>
+            </Card>
             {/* Main Grid */}
             <div className="w-full max-w-full p-10 grid grid-cols-1 lg:grid-cols-3 gap-8 dark:bg-gray-950 rounded-xl outline">
                 {/* Left Section: Wallet Actions */}
@@ -66,7 +118,7 @@ function Wallet() {
                         {/* Glowing Effect */}
                         <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-blue-500 to-purple-500 opacity-20 rounded-full blur-3xl"></div>
                         <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-purple-500 to-pink-500 opacity-20 rounded-full blur-3xl"></div>
-                        <h2 className="text-4xl font-bold relative">${balance}</h2>
+                        <h2 className="text-4xl font-bold relative">${wallet?.wallet.balance}</h2>
                         <p className="text-gray-400 mt-2 relative">Total Balance</p>
                     </Card>
 
@@ -101,37 +153,13 @@ function Wallet() {
                     </Card>
 
                     {/* Withdraw Card */}
-                    <Link to="/withdraw">
-                        <Card className="relative p-6 rounded-xl shadow-lg border border-gray-700 hover:shadow-2xl hover:scale-105 transition transform h-36">
-                            {/* Glowing Effect */}
-                            <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-red-500 to-pink-500 opacity-20 rounded-full blur-3xl"></div>
-                            <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-pink-500 to-red-500 opacity-20 rounded-full blur-3xl"></div>
-                            <h2 className="text-2xl font-bold relative">Withdraw</h2>
-                            <p className="text-gray-400 mt-2 relative">Minimum $50</p>
-                        </Card>
-                    </Link>
+                    <WithdrawDrawer/>
 
                     {/* Deposit Card */}
-                    <Link to="/deposit">
-                        <Card className="relative p-6 rounded-xl shadow-lg border border-gray-700 hover:shadow-2xl hover:scale-105 transition transform h-36">
-                            {/* Glowing Effect */}
-                            <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-green-400 to-blue-500 opacity-20 rounded-full blur-3xl"></div>
-                            <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-blue-500 to-green-500 opacity-20 rounded-full blur-3xl"></div>
-                            <h2 className="text-2xl font-bold relative">Deposit</h2>
-                            <p className="text-gray-400 mt-2 relative">Minimum $1</p>
-                        </Card>
-                    </Link>
+                    <DepositDrawer />
 
                     {/* Transfer Funds Card */}
-                    <Link to="/transfer">
-                        <Card className="relative p-6 rounded-xl shadow-lg border border-gray-700 hover:shadow-2xl hover:scale-105 transition transform h-36">
-                            {/* Glowing Effect */}
-                            <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-blue-500 to-purple-500 opacity-20 rounded-full blur-3xl"></div>
-                            <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-purple-500 to-blue-500 opacity-20 rounded-full blur-3xl"></div>
-                            <h2 className="text-2xl font-bold relative">Transfer Funds</h2>
-                            <p className="text-gray-400 mt-2 relative">Minimum $1</p>
-                        </Card>
-                    </Link>
+                    <TransferDrawer/>
                 </div>
 
                 {/* Right Section: Transactions */}
@@ -266,7 +294,7 @@ function Wallet() {
                             link: "/post/67c05c2bd9817e146bba9ea7",
                         },
                     ].map((item, index) => (
-                        <Link to={item.link || "/" }>
+                        <Link to={item.link || "/"}>
                             <Card
                                 key={index}
                                 className="relative p-6 rounded-2xl shadow-xl border border-gray-700 hover:shadow-2xl transition-all transform hover:scale-[1.02]"

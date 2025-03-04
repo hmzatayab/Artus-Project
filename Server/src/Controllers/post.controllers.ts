@@ -32,8 +32,12 @@ export const createPost = async (req: Request, res: Response) => {
 
 export const getAllPosts = async (req: Request, res: Response) => {
   try {
-    const posts = await postService.getAllPosts();
-    res.status(200).json(posts);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const { posts, hasMore } = await postService.getAllPosts(page, limit);
+
+    res.status(200).json({ posts, hasMore });
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve posts" });
   }

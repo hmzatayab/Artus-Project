@@ -67,3 +67,21 @@ export const uploadImage = async (formData: FormData, token: string) => {
     throw new Error("Failed to upload image");
   }
 };
+
+export const getUSers = async (token: string) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/user/users`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error in wallet API:", error);
+    throw error;
+  }
+}

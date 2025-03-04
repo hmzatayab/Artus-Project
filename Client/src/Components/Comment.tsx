@@ -9,7 +9,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { SendHorizonal, ChevronDown, ChevronUp } from "lucide-react";
 import { RiHeartFill, RiHeartLine, RiVerifiedBadgeFill } from "@remixicon/react";
-import { getPostComments, createComment, createReply, likeComment, likeCommentReply } from "@/Store/Post";
+import { getPostComments, createComment, createReply, likeComment, likeCommentReply } from "@/APIs/Post";
 import { getUser } from "@/utils/storage";
 import { Comment, ReplyType } from "@/Types/Comment"; // Import Comment type
 import { useNavigate } from "react-router-dom";

@@ -1,44 +1,41 @@
-import Hero from "@/components/Hero"
-import '../index.css'
-import PostCard from "@/components/PostCard"
-import { getAllPosts } from "../Store/Post"
-import { useEffect, useState } from "react"
-import { toast } from "sonner"
-import { PostCardSkeleton } from "@/components/Skeleton/PostCard"
-
-interface Post {
-    id: string;
-    imageURL: string;
-    isLive: boolean;
-    user: {
-        name: string;
-        username: string;
-        image: string;
-        followers: number[];
-        identityVerified: boolean;
-    };
-    likes: number[];
-    comments: {}[];
-}
-
-
+import { useEffect, useState } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { getAllPosts } from "../APIs/Post";
+import { toast } from "sonner";
+import PostCard from "@/components/PostCard";
+import { PostCards } from "@/components/Skeleton/PostCards";
+import { Post } from "@/Types/Post";
+import Hero from "@/components/Hero";
 
 function Home() {
-    const [posts, setPosts] = useState<Post[]>([]); // State for storing posts
-    const [loading, setLoading] = useState(true);
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const data = await getAllPosts(); // API Call
-                setPosts(data); // Save posts in state
-            } catch (err) {
-                setError("Failed to fetch posts");
-            } finally {
-                setLoading(false);
+    const fetchPosts = async () => {
+        if (loading) return;
+
+        setLoading(true);
+        try {
+            const data = await getAllPosts(page);
+
+            if (data.posts.length === 0) {
+                setHasMore(false);
+            } else {
+                setPosts(prevPosts => [...prevPosts, ...data.posts]);
+                setPage(prevPage => prevPage + 1);
             }
-        };
+        } catch (err) {
+            setError("Failed to fetch posts");
+            toast("Failed to fetch posts");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchPosts();
     }, []);
 
@@ -50,28 +47,29 @@ function Home() {
                 <Hero />
             </div>
             <div className="relative -mt-[50vh] sm:-mt-[30vh] md:-mt-[5vh] lg:-mt-[8vh] xl:mt-[15vh] 2xl:-mt-[20vh] z-10">
-                <div className="mx-auto px-4 md:px-8 lg:px-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                    {loading ? (
-                        <>
-                            <PostCardSkeleton />
-                            <PostCardSkeleton />
-                            <PostCardSkeleton />
-                            <PostCardSkeleton />
-                        </>
-                    ) : (
-                        <>
-                            {posts
-                                .filter(post => post.isLive)
-                                .map((post, index) => (
-
-                                    <PostCard key={index} post={post} />
-                                ))}
-                        </>
-                    )}
-                </div>
+                <InfiniteScroll
+                    dataLength={posts.length}
+                    next={fetchPosts}
+                    hasMore={hasMore}
+                    loader={<PostCards />}
+                    endMessage={
+                        <div className="flex flex-col items-center justify-center mt-6 text-gray-500 dark:text-gray-400">
+                            <p className="mt-3 text-lg font-medium">No more posts to show</p>
+                            <p className="mt-1 text-sm ">You’ve reached the end. Stay tuned for more!</p>
+                        </div>
+                    }
+                >
+                    <div className="mx-auto px-4 md:px-8 lg:px-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                        {posts
+                            .filter(post => post.isLive)
+                            .map(post => (
+                                <PostCard key={post.id} post={post} />
+                            ))}
+                    </div>
+                </InfiniteScroll>
             </div>
         </div>
-    )
+    );
 }
 
-export default Home
+export default Home;

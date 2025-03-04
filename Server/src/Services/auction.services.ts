@@ -1,5 +1,5 @@
 import prisma from "../config/DB";
-import { generateRandomId } from "../utils/generateId";
+import { generateInvoiceId, generateTransactionId } from "../utils/generateId";
 
 export const createAuction = async (
   postId: string,
@@ -52,8 +52,8 @@ export const createAuction = async (
       amount: startingPrice,
       type: "First Bid",
       status: "completed",
-      transactionId: generateRandomId(12),
-      invoiceId: generateRandomId(6),
+      transactionId: generateTransactionId(),
+      invoiceId: generateInvoiceId(),
     },
   });
 
@@ -216,8 +216,8 @@ export const placeBid = async (
             amount: auction.highestBid,
             type: "refund",
             status: "completed",
-            transactionId: generateRandomId(12),
-            invoiceId: generateRandomId(6),
+            transactionId: generateTransactionId(),
+            invoiceId: generateInvoiceId(),
           },
         });
       }
@@ -235,8 +235,8 @@ export const placeBid = async (
         amount: bidAmount,
         type: "bid",
         status: "completed",
-        transactionId: generateRandomId(12),
-        invoiceId: generateRandomId(6),
+        transactionId: generateTransactionId(),
+        invoiceId: generateInvoiceId(),
       },
     });
 
@@ -247,8 +247,8 @@ export const placeBid = async (
         amount: 1,
         type: "bid_fee",
         status: "completed",
-        transactionId: generateRandomId(12),
-        invoiceId: generateRandomId(6),
+        transactionId: generateTransactionId(),
+        invoiceId: generateInvoiceId(),
       },
     });
 
@@ -326,8 +326,8 @@ export const endAuction = async (auctionId: string, userId: string) => {
         amount: finalAmountForBidder,
         type: "bonus",
         status: "completed",
-        transactionId: generateRandomId(12),
-        invoiceId: generateRandomId(6),
+        transactionId: generateTransactionId(),
+        invoiceId: generateInvoiceId(),
       },
     });
 

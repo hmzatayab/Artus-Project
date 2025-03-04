@@ -26,8 +26,12 @@ export const createPost = async (postData: {
   }
 };
 
-export const getAllPosts = async () => {
-  return await prisma.post.findMany({
+export const getAllPosts = async (page: number, limit: number = 10) => {
+  const skip = (page - 1) * limit;
+
+  const posts = await prisma.post.findMany({
+    skip,
+    take: limit,
     include: {
       user: {
         select: {
@@ -55,6 +59,11 @@ export const getAllPosts = async () => {
     },
     orderBy: { createdAt: "desc" },
   });
+
+  const totalPosts = await prisma.post.count();
+  const hasMore = page * limit < totalPosts; // Check if more posts are available
+
+  return { posts, hasMore };
 };
 
 export const getPostsByUserId = async (userId: string) => {
@@ -69,6 +78,19 @@ export const getPostsByUserId = async (userId: string) => {
           name: true,
           image: true,
           followers: true,
+          identityVerified: true,
+        },
+      },
+      comments: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              image: true,
+            },
+          },
         },
       },
     },

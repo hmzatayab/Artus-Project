@@ -3,7 +3,8 @@ import { Card } from "../ui/card";
 
 export function PostCardSkeleton() {
   return (
-    <Card className="shadow-lg dark:shadow-gray-800/50 shadow-gray-500/50 dark:bg-gray-950 bg-gray-200 rounded-lg overflow-hidden h-fit p-4 transition duration-500">
+
+    <Card className="mt-4 shadow-lg dark:shadow-gray-800/50 shadow-gray-500/50 dark:bg-gray-950 bg-gray-200 rounded-lg overflow-hidden h-fit p-4 transition duration-500">
       {/* Post Image Skeleton */}
       <div className="relative w-full pb-[140%] overflow-hidden rounded-lg">
         <Skeleton className="absolute top-0 left-0 w-full h-full" />
@@ -34,5 +35,6 @@ export function PostCardSkeleton() {
         </div>
       </div>
     </Card>
+
   );
 }

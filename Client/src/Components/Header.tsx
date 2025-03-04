@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/DarkMode/mode-toggle";
 import { getUser, removeUser } from "@/utils/storage";
-import { getUserNotifications } from "@/Store/User";
+import { getUserNotifications } from "@/APIs/User";
 import { toast } from "sonner"
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";

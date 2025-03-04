@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { forwardRef } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -7,34 +8,19 @@ import { RiVerifiedBadgeFill, RiChat1Line, RiGroupLine, } from "@remixicon/react
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 import LikeButton from "./LikeButton";
 import { getUser } from "@/utils/storage";
-
-// Define Post Type
-interface Post {
-    id: string;
-    imageURL: string;
-    isLive: boolean;
-    user: {
-        name: string;
-        username: string;
-        image: string;
-        followers: number[];
-        identityVerified: boolean;
-    };
-    likes: number[];
-    comments: {}[];
-}
+import { Post } from "@/Types/Post";
 
 interface PostCardProps {
     post: Post;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post }) => {
+const PostCard = forwardRef<HTMLDivElement, PostCardProps>(({ post }, ref) => {
+console.log(post);
 
     const data = getUser();
 
     return (
-
-        <Card className="shadow-lg dark:shadow-gray-800/50 shadow-gray-500/50 dark:bg-gray-950 bg-gray-200 rounded-lg overflow-hidden h-fit p-4 transition duration-500"> {/**  bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 animate-pulse */}
+        <Card ref={ref} className="shadow-lg dark:shadow-gray-800/50 shadow-gray-500/50 dark:bg-gray-950 bg-gray-200 rounded-lg overflow-hidden h-fit p-4 transition duration-500"> {/**  bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 animate-pulse */}
             {/* Post Image */}
             <div className="relative w-full pb-[140%] overflow-hidden rounded-lg cursor-pointer">
                 <Link to={`/post/${post.id}`}>
@@ -122,8 +108,6 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                                     isInitiallyLiked={data?.user?.id ? post.likes.includes(data.user.id) : false}
                                     color={"bg-gray-900"}
                                 />
-
-
                                 <Link to={`/post/${post.id}`}>
                                     <Button variant="outline" className="rounded-full ml-2 cursor-pointer dark:bg-gray-900 bg-gray-300">
                                         <RiChat1Line />
@@ -142,6 +126,6 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
             </div>
         </Card>
     );
-};
+});
 
 export default PostCard;

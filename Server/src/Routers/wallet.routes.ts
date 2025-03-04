@@ -10,6 +10,7 @@ router.post("/deposit", authMiddleware, walletController.depositFunds); // Depos
 router.post("/withdraw", authMiddleware, walletController.withdrawFunds); // Withdraw funds
 router.post("/transfer", authMiddleware, walletController.transferFunds); // Withdraw funds
 router.get("/balance", authMiddleware, walletController.getWalletBalance); // Get wallet balance
+router.get("/", authMiddleware, walletController.getWallet); // Get wallet
 router.delete("/delete", walletController.deleteWallet); // Delete wallet
 
 router.get("/transaction", authMiddleware, walletController.getWalletTransactions); // Get wallet transactions

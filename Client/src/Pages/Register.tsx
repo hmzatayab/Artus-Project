@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { useState } from "react";
 import { useUser } from "../Context/UserContext";
-import { registerUser } from "../Store/User";
+import { registerUser } from "../APIs/User";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import PasswordStrengthMeter from "@/utils/PasswordMeter";

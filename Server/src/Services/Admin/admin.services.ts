@@ -2,7 +2,7 @@ import prisma from "../../config/DB";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import { generateRandomId } from "../../utils/generateId";
+import { generateId } from "../../utils/generateId";
 
 interface CreateAdminInput {
   email: string;
@@ -42,8 +42,8 @@ export const createAdmin = async ({
     data: {
       email,
       name,
-      passcode: generateRandomId(4),
-      adminId: generateRandomId(8),
+      passcode: generateId(4),
+      adminId: generateId(8),
       password: hashedPassword,
       emailVerificationToken,
       walletIsActive: adminCount === 0,

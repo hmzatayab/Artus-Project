@@ -22,7 +22,20 @@ interface LikeResponse {
 }
 
 
-export const getAllPosts = async () => {
+export const getAllPosts = async (page: number) => {
+    const res = await fetch(`${API_URL}/post?page=${page}&limit=10`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch posts");
+
+    return await res.json();
+};
+
+export const getAllPost = async () => {
     const res = await fetch(`${API_URL}/post`, {
         method: "GET",
         headers: {

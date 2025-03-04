@@ -136,11 +136,37 @@ export const userProfile = async (req: Request, res: Response) => {
       return;
     }
 
-    const { password, passwordResetToken, passwordResetTokenExpiry, ...userData } = user;
+    const {
+      password,
+      passwordResetToken,
+      passwordResetTokenExpiry,
+      ...userData
+    } = user;
 
     res.json(userData);
   } catch (error) {
     console.error("Error fetching user profile:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const getAllUser = async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        name: true,
+        image: true,
+        followers: true,
+        identityVerified: true,
+      },
+    });
+
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching all users:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
