@@ -6,16 +6,11 @@ import { Link } from "react-router-dom";
 import { CalendarIcon } from "lucide-react";
 import { RiVerifiedBadgeFill, RiChat1Line, RiGroupLine, } from "@remixicon/react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import LikeButton from "./LikeButton";
+import LikeButton from "@/components/LikeButton";
 import { getUser } from "@/utils/storage";
-import { Post } from "@/Types/Post";
-
-interface PostCardProps {
-    post: Post;
-}
+import { PostCardProps } from "@/Types/Post";
 
 const PostCard = forwardRef<HTMLDivElement, PostCardProps>(({ post }, ref) => {
-console.log(post);
 
     const data = getUser();
 
@@ -100,7 +95,6 @@ console.log(post);
                 <div className="flex items-center justify-end w-auto ">
                     <div>
                         {post.isLive ? (
-
                             <>
                                 <LikeButton
                                     postId={post.id}
@@ -121,7 +115,6 @@ console.log(post);
                             </Button>
                         )}
                     </div>
-
                 </div>
             </div>
         </Card>

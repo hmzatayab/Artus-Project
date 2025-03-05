@@ -31,7 +31,7 @@ export const getUserNotifications = async (token: string) => {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`, // Token bhejna zaroori hai
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -45,7 +45,7 @@ export const getProfileData = async (token: string) => {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`, // Token bhejna zaroori hai
+      Authorization: `Bearer ${token}`, 
     },
   });
 

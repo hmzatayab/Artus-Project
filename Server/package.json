@@ -13,14 +13,17 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.3.1",
+    "@types/cookie-session": "^2.0.49",
     "@types/cors": "^2.8.17",
     "@types/cryptojs": "^3.1.33",
     "@types/geoip-lite": "^1.4.4",
     "@types/mongoose": "^5.11.96",
     "@types/request-ip": "^0.0.41",
+    "@types/socket.io": "^3.0.1",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
+    "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
@@ -31,6 +34,7 @@
     "path": "^0.12.7",
     "prisma": "^6.3.1",
     "request-ip": "^3.3.0",
+    "socket.io": "^4.8.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

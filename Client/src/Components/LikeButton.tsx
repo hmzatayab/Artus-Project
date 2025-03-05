@@ -5,13 +5,8 @@ import { RiHeartLine, RiHeartFill } from "@remixicon/react";
 import { toast } from "sonner";
 import { getUser } from "@/utils/storage";
 import { formatCount } from "@/utils/formatNumber";
+import { LikeButtonProps } from "@/Types/Post";
 
-interface LikeButtonProps {
-    postId: string;
-    initialLikes: number;
-    isInitiallyLiked: boolean;
-    color: string;
-}
 
 const LikeButton: React.FC<LikeButtonProps> = ({ postId, initialLikes, isInitiallyLiked, color }) => {
     const [isLiked, setIsLiked] = useState<boolean>(isInitiallyLiked);
@@ -25,7 +20,6 @@ const LikeButton: React.FC<LikeButtonProps> = ({ postId, initialLikes, isInitial
             toast("You need to be logged in to like posts.");
             return;
         }
-
         try {
             const response = await likePost(postId, token);
             if (response) {
@@ -34,6 +28,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({ postId, initialLikes, isInitial
             }
         } catch (error) {
             console.error("Error while liking post:", error);
+            toast("Something went wrong. Please try again later.");
         }
     };
 

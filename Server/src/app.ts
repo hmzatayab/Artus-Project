@@ -15,6 +15,7 @@ import walletRoute from "./Routers/wallet.routes";
 import adminRoute from "./Routers/Admin/admin.routes";
 import auctionRoute from "./Routers/auction.routes";
 import notificationRoute from "./Routers/notification.routes";
+import cookieSession from "cookie-session";
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -28,6 +29,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors({
   origin: "http://localhost:5173", 
   credentials: true, 
+}));
+app.use(cookieSession({
+  name: "session",
+  keys: [process.env.SESSION_KEY1 as string, process.env.SESSION_KEY2 as string],
+  maxAge: 24 * 60 * 60 * 1000,
+  secure: false,
+  httpOnly: true,
 }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/Images", express.static(path.join(__dirname, "public/Images")));

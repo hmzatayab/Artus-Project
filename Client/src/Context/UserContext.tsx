@@ -1,18 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { saveUser, getUser, removeUser } from "@/utils/storage";
-
-interface User {
-    id: string;
-    email: string;
-    username: string;
-    name?: string;
-    token?: string;
-}
-
-interface UserContextType {
-    user: User | null;
-    setUser: (user: User | null) => void;
-}
+import { User, UserContextType } from "@/Types/User";
 
 const UserDataContext = createContext<UserContextType | undefined>(undefined);
 

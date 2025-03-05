@@ -47,7 +47,6 @@ const UploadDrawer: React.FC = () => {
                 toast("Image aspect ratio must be 9:16.");
                 return;
             }
-
             setImageFile(file);
         };
 
@@ -64,7 +63,6 @@ const UploadDrawer: React.FC = () => {
             setLoading(false);
             return;
         }
-
         if (title.length < 15 || title.length > 25) {
             toast("Title must be between 15 and 25 characters");
             setLoading(false);

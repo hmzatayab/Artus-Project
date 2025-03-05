@@ -5,7 +5,7 @@ import { Minus, Plus, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Card } from "../ui/card";
-import { withdrawAmount } from "@/APIs/Wallet"; // Import withdraw API
+import { withdrawAmount } from "@/APIs/Wallet";
 import { getUser } from "@/utils/storage";
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
@@ -25,21 +25,21 @@ export function WithdrawDrawer() {
     }
 
     const handleWithdraw = async () => {
-        setLoading(true); // Start loading
+        setLoading(true); 
         try {
-            await withdrawAmount(amount, token); // Call withdraw API
-            setIsConfirmDialogOpen(false); // Close confirmation dialog
-            setIsSuccessDialogOpen(true); // Open success dialog
+            await withdrawAmount(amount, token); 
+            setIsConfirmDialogOpen(false);
+            setIsSuccessDialogOpen(true); 
             toast.success("Withdrawal Successful");
         } catch (err) {
             toast.error(`Failed to withdraw ${err || "Something went wrong!"}`);
         } finally {
-            setLoading(false); // Stop loading
+            setLoading(false); 
         }
     };
 
     const handleConfirmWithdraw = () => {
-        setIsConfirmDialogOpen(true); // Open confirmation dialog
+        setIsConfirmDialogOpen(true);
     };
 
     return (

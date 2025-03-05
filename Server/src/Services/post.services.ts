@@ -17,7 +17,7 @@ export const createPost = async (postData: {
         description,
         tags,
         imageURL,
-        Status: "pending", // Default status
+        Status: "pending",
       },
     });
     return newPost;
@@ -153,21 +153,28 @@ export const likePost = async (postId: string, userId: string) => {
     ? post.likes.filter((id) => id !== userId)
     : [...post.likes, userId];
 
-  return await prisma.post.update({
+  const updatedPost = await prisma.post.update({
     where: { id: postId },
     data: { likes: updatedLikes },
   });
+
+  await prisma.notification.create({
+    data: {
+      receiverId: post.userId,
+      senderId: userId,
+      type: "like",
+      message: `Your post has been liked by.`,
+      link: `/post/${postId}`,
+      isRead: false,
+    },
+  });
+
+  return updatedPost;
 };
 
 export const updatePost = async (
   postId: string,
-  updates: Partial<{
-    title: string;
-    description: string;
-    tags: string[];
-    imageURL: string;
-    isLive: boolean;
-  }>
+  updates: Partial<{ title: string; description: string; tags: string[] }>
 ) => {
   return await prisma.post.update({
     where: { id: postId },

@@ -5,43 +5,32 @@ import { Minus, Plus, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Card } from "../ui/card";
-import { transferAmount } from "@/APIs/Wallet"; // Import transfer and getUsers API
+import { transferAmount } from "@/APIs/Wallet";
 import { getUser } from "@/utils/storage";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
 import LoadingIcon from "@/utils/Loading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getUSers } from "@/APIs/User";
-
-interface User {
-    id: string;
-    username: string;
-    email: string;
-    name: string;
-    image: string;
-    followers: string[];
-    identityVerified: boolean;
-}
+import { User } from "@/Types/User";
 
 export function TransferDrawer() {
     const [amount, setAmount] = React.useState(50);
     const [recipient, setRecipient] = React.useState("");
-    const [recipientUser, setRecipientUser] = React.useState<User | null>(null); // Selected recipient user data
-    const [userList, setUserList] = React.useState<User[]>([]); // List of all users for search
-    const [isSearchDialogOpen, setIsSearchDialogOpen] = React.useState(false); // Dialog for user search
-    const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false); // Confirmation dialog
-    const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false); // Success dialog
+    const [recipientUser, setRecipientUser] = React.useState<User | null>(null);
+    const [userList, setUserList] = React.useState<User[]>([]); 
+    const [isSearchDialogOpen, setIsSearchDialogOpen] = React.useState(false); 
+    const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false); 
+    const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
 
     const data = getUser();
     const token = data.token;
 
-    // Fetch list of users (excluding current user)
     React.useEffect(() => {
         const fetchUserList = async () => {
             try {
                 const response = await getUSers(token);
-                // Ensure response is an array
                 if (Array.isArray(response)) {
                     setUserList(response);
                 } else {
@@ -54,12 +43,11 @@ export function TransferDrawer() {
         fetchUserList();
     }, [token]);
 
-    // Handle recipient selection
     const handleRecipientSearch = (username: string) => {
         const selectedUser = userList.find(
-            (user) => user.username.toLowerCase() === username.toLowerCase()
+            (user: any) => user.username.toLowerCase() === username.toLowerCase()
         );
-        setRecipientUser(selectedUser || null); // Store selected user or null if not found
+        setRecipientUser(selectedUser || null);
     };
 
     function onClick(adjustment: number) {
@@ -71,17 +59,16 @@ export function TransferDrawer() {
             toast.error("Please select a valid recipient.");
             return;
         }
-
-        setLoading(true); // Start loading
+        setLoading(true); 
         try {
-            await transferAmount(amount, recipientUser.id, token); // Call transfer API
-            setIsConfirmDialogOpen(false); // Close confirmation dialog
-            setIsSuccessDialogOpen(true); // Open success dialog
+            await transferAmount(amount, recipientUser.id, token);
+            setIsConfirmDialogOpen(false);
+            setIsSuccessDialogOpen(true);
             toast.success("Transfer Successful");
         } catch (err) {
             toast.error(`Failed to transfer ${err || "Something went wrong!"}`);
         } finally {
-            setLoading(false); // Stop loading
+            setLoading(false); 
         }
     };
 
@@ -90,7 +77,7 @@ export function TransferDrawer() {
             toast.error("Please select a valid recipient.");
             return;
         }
-        setIsConfirmDialogOpen(true); // Open confirmation dialog
+        setIsConfirmDialogOpen(true); 
     };
 
     return (
@@ -137,7 +124,7 @@ export function TransferDrawer() {
                         <DrawerFooter className="flex flex-col gap-2 mt-6">
                             <Button
                                 className="w-full"
-                                onClick={() => setIsSearchDialogOpen(true)} // Open search dialog
+                                onClick={() => setIsSearchDialogOpen(true)} 
                             >
                                 Select Recipient
                             </Button>
@@ -164,7 +151,7 @@ export function TransferDrawer() {
                             value={recipient}
                             onChange={(e) => {
                                 setRecipient(e.target.value);
-                                handleRecipientSearch(e.target.value); // Search recipient by username
+                                handleRecipientSearch(e.target.value); 
                             }}
                             placeholder="Enter recipient's username"
                             className="w-full px-4 py-2 border-2 outline-1 rounded-lg focus:ring-4 focus:ring-indigo-500 outline-none placeholder-gray-400 transition-all duration-300"
@@ -173,7 +160,7 @@ export function TransferDrawer() {
                             <div className="mt-4 flex items-center space-x-4">
                                 <Avatar className="w-12 h-12">
                                     <AvatarImage src={recipientUser.image || ""} alt="Recipient Avatar" />
-                                    <AvatarFallback>{recipientUser.username[0] || "A"}</AvatarFallback>
+                                    <AvatarFallback>{recipientUser.username?.[0] || "A"}</AvatarFallback>
                                 </Avatar>
                                 <div>
                                     <p className="font-bold">{recipientUser.username}</p>
@@ -188,10 +175,10 @@ export function TransferDrawer() {
                         <Button
                             className="w-full"
                             onClick={() => {
-                                setIsSearchDialogOpen(false); // Close search dialog
-                                handleConfirmTransfer(); // Open confirmation dialog
+                                setIsSearchDialogOpen(false);
+                                handleConfirmTransfer(); 
                             }}
-                            disabled={!recipientUser} // Disable button if no recipient is selected
+                            disabled={!recipientUser} 
                         >
                             Next
                         </Button>
@@ -222,7 +209,7 @@ export function TransferDrawer() {
                             <div className="flex items-center space-x-4">
                                 <Avatar className="w-12 h-12">
                                     <AvatarImage src={recipientUser?.image || ""} alt="Recipient Avatar" />
-                                    <AvatarFallback>{recipientUser?.username[0] || "A"}</AvatarFallback>
+                                    <AvatarFallback>{recipientUser?.username?.[0] || "A"}</AvatarFallback>
                                 </Avatar>
                                 <span className="text-white font-bold">{recipientUser?.username}</span>
                             </div>

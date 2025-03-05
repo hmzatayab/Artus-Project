@@ -43,7 +43,7 @@ export const withdrawAmount = async (amount: number, token: string): Promise<any
 export const transferAmount = async (amount: number, receiverId: string, token: string): Promise<any> => {
     try {
         const response = await axios.post(
-            `${API_URL}/wallet/transfer`, // API endpoint
+            `${API_URL}/wallet/transfer`,
             { amount, receiverId },
             {
                 headers: {
@@ -53,13 +53,12 @@ export const transferAmount = async (amount: number, receiverId: string, token: 
             }
         );
 
-        return response.data; // Return only if response is valid
+        return response.data;
     } catch (error: any) {
         console.error("Error in transfer API:", error.response?.data || error.message);
-        throw new Error(error.response?.data?.message || "Transfer failed"); // Better error handling
+        throw new Error(error.response?.data?.message || "Transfer failed"); 
     }
 };
-
 
 export const getWallet = async (token: string): Promise<any> => {
     try {

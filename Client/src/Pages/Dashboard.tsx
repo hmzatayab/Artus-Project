@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import PostCard from "@/components/PostCard";
 import { toast } from "sonner"
 import { getUserPosts } from "@/APIs/Post";
-import { getUser } from "@/utils/storage";
+import { getUser } from "@/utils/Storage";
 import { PostCardSkeleton } from "@/components/Skeleton/PostCard";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { CalendarIcon } from "lucide-react";

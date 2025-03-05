@@ -35,13 +35,13 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notificatio
                 )}
                 {notifications.length > 0 ? (
                     notifications
-                        .slice() // Original array ko mutate na karne ke liye copy bana rahe hain
+                        .slice() 
                         .slice(0, 12)
                         .map((notification) => (
                             <div key={notification.id}>
                                 <DropdownMenuItem className="cursor-pointer mb-2">
                                     <div>
-                                        <Link to="/some-page" className="flex px-4 py-3 transition">
+                                        <Link to={`${notification.link || "/"}`} className="flex px-4 py-3 transition">
                                             <div className="shrink-0 relative">
                                                 <Link to="/profile/username">
                                                     <img

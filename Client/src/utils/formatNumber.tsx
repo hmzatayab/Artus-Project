@@ -4,5 +4,5 @@ export function formatCount(count: number): string {
     } else if (count >= 1_000) {
         return (count / 1_000).toFixed(1).replace(/\.0$/, "") + "K"; // 1K format
     }
-    return count.toString(); // Default number
+    return count.toString(); 
 }

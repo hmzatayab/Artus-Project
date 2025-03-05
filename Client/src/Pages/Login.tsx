@@ -15,7 +15,6 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import LoadingIcon from "@/utils/Loading";
 
-// ✅ Validation Schema
 const loginSchema = z.object({
     email: z.string().email("Invalid email"),
     password: z.string().min(6, "Password must be at least 6 characters"),
@@ -38,7 +37,7 @@ const Login = () => {
         try {
             const user = await loginUser(data);
             if (user) {
-                setUser(user); // Context me user ko set karna
+                setUser(user);
                 localStorage.setItem("userToken", user.token);
                 Navigation("/");
                 toast("Login successful")

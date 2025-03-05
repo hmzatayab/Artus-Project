@@ -11,29 +11,22 @@ import { SendHorizonal, ChevronDown, ChevronUp } from "lucide-react";
 import { RiHeartFill, RiHeartLine, RiVerifiedBadgeFill } from "@remixicon/react";
 import { getPostComments, createComment, createReply, likeComment, likeCommentReply } from "@/APIs/Post";
 import { getUser } from "@/utils/storage";
-import { Comment, ReplyType } from "@/Types/Comment"; // Import Comment type
+import { Comment, ReplyType, CommentCardProps } from "@/Types/Comment";
 import { useNavigate } from "react-router-dom";
 import { CommentSkeleton } from "./Skeleton/Comment";
-
-type CommentCardProps = {
-    postId: string;
-    postUserImage: string;
-    postUserName: string;
-};
 
 const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUserName }) => {
     const [comments, setComments] = useState<Comment[]>([]);
     const [comment, setComment] = useState("");
-    const [replyingTo, setReplyingTo] = useState<{ username: string; commentId: string } | null>(null); // Track replying user
+    const [replyingTo, setReplyingTo] = useState<{ username: string; commentId: string } | null>(null); 
     const [error, setError] = useState<string | null>(null);
-    const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({}); // Track expanded comments
+    const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
     const [loading, setLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const Navigate = useNavigate();
 
     const data = getUser();
 
-    // Fetch comments for the post
     useEffect(() => {
         const fetchPostComment = async () => {
             try {
@@ -235,7 +228,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
     const toggleExpandReplies = (commentId: string) => {
         setExpandedComments((prev) => ({
             ...prev,
-            [commentId]: !prev[commentId], // Toggle expanded state
+            [commentId]: !prev[commentId],
         }));
     };
 
@@ -261,7 +254,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                                 <AvatarFallback>
                                     {comment.user.name
                                         .split(" ")
-                                        .map((word: string) => word[0]) // Explicitly define word as string
+                                        .map((word: string) => word[0]) 
                                         .join("")
                                         .toUpperCase()}
                                 </AvatarFallback>
@@ -310,7 +303,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                                     {/* Reply Button */}
                                     <div className="flex items-center gap-4 mt-2">
                                         <button
-                                            onClick={() => handleReplyClick(comment.user.name, comment.id)} // Show reply input for this comment
+                                            onClick={() => handleReplyClick(comment.user.name, comment.id)}
                                             className="text-sm dark:text-gray-400 hover:text-gray-200 transition-colors cursor-pointer"
                                         >
                                             Reply
@@ -323,7 +316,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                                     <div className="mt-4 lg:pl-10 lg:border-l dark:border-gray-700 border-gray-300">
                                         {(expandedComments[comment.id]
                                             ? comment.replies
-                                            : comment.replies.slice(0, 3) // Show only 3 replies initially
+                                            : comment.replies.slice(0, 3) 
                                         ).map((reply) => (
                                             <div key={reply.id} className="flex items-start gap-4 mt-4">
                                                 <Avatar className="w-8 h-8 border-2 cursor-pointer">
@@ -373,23 +366,23 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                                                     <div className="flex gap-3">
                                                         {/* Like Button */}
                                                         <button
-                                                            onClick={() => handleLikeCommentReply(reply.id, comment.id)} // Pass both replyId and commentId
+                                                            onClick={() => handleLikeCommentReply(reply.id, comment.id)}
                                                             className="flex items-center gap-1 mt-2 text-sm hover:text-blue-500 transition-colors cursor-pointer"
                                                         >
                                                             {data?.user?.id && reply?.likes?.includes(data.user.id) ? (
-                                                                <RiHeartFill className="w-4 h-4 text-red-500" /> // Filled heart if liked
+                                                                <RiHeartFill className="w-4 h-4 text-red-500" />
                                                             ) : (
-                                                                <RiHeartLine className="w-4 h-4 dark:text-gray-400 text-gray-600" /> // Outline heart if not liked
+                                                                <RiHeartLine className="w-4 h-4 dark:text-gray-400 text-gray-600" /> 
                                                             )}
                                                             <span className={data?.user?.id && reply?.likes?.includes(data.user.id) ? "text-red-500" : "text-gray-400"}>
-                                                                {reply.likes.length} {/* Display like count */}
+                                                                {reply.likes.length} 
                                                             </span>
                                                         </button>
 
                                                         {/* Reply Button for Nested Replies */}
                                                         <div className="flex items-center gap-4 mt-2">
                                                             <button
-                                                                onClick={() => handleReplyClick(reply.user.name, comment.id)} // Show reply input for this reply
+                                                                onClick={() => handleReplyClick(reply.user.name, comment.id)} 
                                                                 className="text-sm text-gray-400 hover:text-gray-200 transition-colors cursor-pointer"
                                                             >
                                                                 Reply
@@ -436,7 +429,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                             <AvatarFallback>
                                 {postUserName
                                     .split(" ")
-                                    .map((word: string) => word[0]) // Explicitly define word as string
+                                    .map((word: string) => word[0]) 
                                     .join("")
                                     .toUpperCase()}
                             </AvatarFallback>
@@ -454,7 +447,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                         <Button
                             variant="ghost"
                             size="icon"
-                            onClick={replyingTo ? handleReplySubmit : handleCommentSubmit} // Handle reply or comment submission
+                            onClick={replyingTo ? handleReplySubmit : handleCommentSubmit} 
                         >
                             {loading ? (
                                 <svg

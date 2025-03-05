@@ -11,14 +11,14 @@ import { Post } from "@/Types/Post"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RiBookmarkLine, RiChat1Line, RiGroupLine, RiMore2Fill, RiUserStarLine, RiVerifiedBadgeFill } from "@remixicon/react";
+import { RiBookmarkLine, RiChat1Line, RiGroupLine, RiUserStarLine, RiVerifiedBadgeFill } from "@remixicon/react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import LikeButton from "@/components/LikeButton";
 import PostCard from "@/components/PostCard";
 import CommentCard from "@/components/Comment";
 import { PostSkeleton } from "@/components/Skeleton/Post";
 import { PostCardSkeleton } from "@/components/Skeleton/PostCard";
+import { PostActions } from "@/components/PostActions"
 
 
 export default function PostPage() {
@@ -58,11 +58,15 @@ export default function PostPage() {
         fetchPosts();
     }, []);
 
+    const handlePostUpdate = (updatedPost: Post) => {
+        setPost(updatedPost); // Update the post state
+      };
+
     if (error) return toast(`${error}`);
 
     return (
         <div className="mt-24 mb-10">
-            {!post ? ( // Show skeleton while loading
+            {!post ? (
                 <PostSkeleton />
             ) : (
                 <div className="flex justify-center mt-10">
@@ -81,7 +85,7 @@ export default function PostPage() {
                             {/* User Profile Row */}
                             <div className="flex items-center justify-between lg:flex-row">
                                 <div className="flex items-center gap-4">
-                                    <Link to={`/profile/${post.user.username}`}>
+                                    <Link to={`/profile/${post.user?.username}`}>
                                         <Avatar className="cursor-pointer w-15 h-15 outline-2 border-3 dark:border-gray-950 border-white outline-green-500 text-green-500">
                                             <AvatarImage src={post.user.image} alt="Profile" />
                                             <AvatarFallback className="text-green-500">{post.user.name.split(" ")[0].slice(0, 2).toUpperCase()}</AvatarFallback>
@@ -115,7 +119,6 @@ export default function PostPage() {
                                                     </HoverCard>
                                                 </div>
                                             )}
-
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <p className="text-sm text-gray-400 italic">@{post.user.username}</p>
@@ -134,23 +137,8 @@ export default function PostPage() {
                                 </div>
 
                                 <div>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger>
-                                            <RiMore2Fill className="cursor-pointer" />
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent>
-                                            <DropdownMenuItem className="cursor-pointer"><Link to={'/'}>Report</Link></DropdownMenuItem>
-                                            <DropdownMenuItem className="cursor-pointer"><Link to={'/'}>Edit</Link></DropdownMenuItem>
-                                            <DropdownMenuItem className="cursor-pointer">Copy link</DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                className="text-red-500 cursor-pointer"
-                                            >
-                                                Delete
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                                <PostActions post={post} userId={data?.user?.id} onPostUpdate={handlePostUpdate} />
                                 </div>
-
                             </div>
 
                             {/* Post Title */}
@@ -216,12 +204,11 @@ export default function PostPage() {
                                     </div>
                                 </div>
 
-
                                 {activeTab === "comments" ? (
                                     <CommentCard
-                                        postId={postId || ""} // Use empty string as fallback
-                                        postUserImage={post.user?.image || ""} // Use empty string as fallback
-                                        postUserName={post.user?.name || "Anonymous"} // Use "Anonymous" as fallback
+                                        postId={postId || ""}
+                                        postUserImage={post.user?.image || ""}
+                                        postUserName={post.user?.name || "Anonymous"}
                                     />
                                 ) : activeTab === "ownership" ? (
                                     <div>
@@ -229,14 +216,11 @@ export default function PostPage() {
                                         <div className="p-3">hamza</div>
                                     </div>
                                 ) : null}
-
                             </div>
-
                         </div>
                     </div>
                 </div>
             )}
-
             <div>
                 <div className="mt-10">
                     <div className="relative mb-8 flex flex-col items-center text-center">
@@ -267,5 +251,5 @@ export default function PostPage() {
                 </div>
             </div>
         </div>
-    )
+    );
 }

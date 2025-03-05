@@ -136,7 +136,7 @@ const Register = () => {
                                                 </div>
                                             </FormControl>
                                             <FormMessage />
-                                            <PasswordStrengthMeter password={field.value || ""} /> {/* Strength Meter */}
+                                            <PasswordStrengthMeter password={field.value || ""} />
                                         </FormItem>
                                     );
                                 }}

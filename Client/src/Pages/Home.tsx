@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { getAllPosts } from "../APIs/Post";
 import { toast } from "sonner";
+import { getAllPosts } from "@/APIs/Post";
 import PostCard from "@/components/PostCard";
 import { PostCards } from "@/components/Skeleton/PostCards";
 import { Post } from "@/Types/Post";

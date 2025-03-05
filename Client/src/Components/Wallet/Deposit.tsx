@@ -25,7 +25,7 @@ export function DepositDrawer() {
     }
 
     const handleDeposit = async () => {
-        setLoading(true); // Start loading
+        setLoading(true);
         try {
             await depositAmount(amount, token);
             setIsConfirmDialogOpen(false); 
@@ -34,7 +34,7 @@ export function DepositDrawer() {
         } catch (err) {
             toast.error(`Failed to deposit ${err || "Something went wrong!"}`);
         } finally {
-            setLoading(false); // Stop loading
+            setLoading(false);
         }
     };
 

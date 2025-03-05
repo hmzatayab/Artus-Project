@@ -6,6 +6,7 @@ export type Post = {
   description: string;
   tags: string[];
   createdAt: string;
+  updatedAt: string;
   user: {
     id: string;
     name: string;
@@ -17,3 +18,14 @@ export type Post = {
   likes: number[];
   comments: {}[];
 };
+
+export interface LikeButtonProps {
+    postId: string;
+    initialLikes: number;
+    isInitiallyLiked: boolean;
+    color: string;
+}
+
+export interface PostCardProps {
+  post: Post;
+}

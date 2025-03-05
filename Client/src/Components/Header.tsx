@@ -16,19 +16,6 @@ import NotificationDropdown from "./Notification";
 import { MenuComponent } from "./Menu";
 import { Notification } from "@/Types/Notification"
 
-// interface Notification {
-//     id: string;
-//     message: string;
-//     link?: string;
-//     isRead: boolean;
-//     createdAt: string;
-//     sender: {
-//         id: string;
-//         username: string;
-//         image: string;
-//     };
-// }
-
 function Header() {
     // const Navigator = useNavigate();
     const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -62,7 +49,6 @@ function Header() {
                 console.error("Error fetching notifications:", error);
             }
         };
-
         fetchNotifications();
     }, []);
 

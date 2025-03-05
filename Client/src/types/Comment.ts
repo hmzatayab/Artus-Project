@@ -31,3 +31,9 @@ export type ReplyType = {
         identityVerified?: boolean;
     };
 };
+
+export type CommentCardProps = {
+    postId: string;
+    postUserImage: string;
+    postUserName: string;
+};

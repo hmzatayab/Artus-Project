@@ -4,23 +4,12 @@ import { Post } from "@/Types/Post";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-
-interface CommentType {
-    id: string;
-    content: string;
-    user: {
-        name: string;
-        image: string;
-    };
-}
-
 interface LikeResponse {
     post: {
         isLikedByCurrentUser: boolean;
         likes: string[];
     };
 }
-
 
 export const getAllPosts = async (page: number) => {
     const res = await fetch(`${API_URL}/post?page=${page}&limit=10`, {
@@ -72,13 +61,34 @@ export const likePost = async (postId: string, token: string): Promise<LikeRespo
                 },
             }
         );
-
         return response.data;
     } catch (error) {
         console.error("Error liking post:", error);
         throw error;
     }
 };
+
+
+export const updatePost = async (postId: string, updateData: object, token: string) => {
+    try {
+        const response = await axios.put(
+            `${API_URL}/post/update/${postId}`, 
+            updateData,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`, 
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error updating post:", error);
+        throw error;
+    }
+};
+
+
 
 export const getPost = async (postId: string): Promise<Post> => {
     try {
@@ -102,38 +112,34 @@ export const getPostComments = async (postId: string): Promise<Comment[]> => {
     }
 };
 
-export const createComment = async (postId: string, content: string, token: string): Promise<{ comment: CommentType }> => {
+export const createComment = async (postId: string, content: string, token: string): Promise<{ comment: Comment }> => {
     try {
         const response = await axios.post(
             `${API_URL}/comment/create`,
-            { postId, content }, // Body JSON data
+            { postId, content },
             {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`, // Token in headers
+                    Authorization: `Bearer ${token}`,
                 },
             }
         );
-        return response.data as { comment: CommentType };
+        return response.data as { comment: Comment };
     } catch (error) {
         console.error("Error creating comment:", error);
         throw error;
     }
 };
 
-export const createReply = async (
-    commentId: string,
-    content: string,
-    token: string
-): Promise<{ reply: ReplyType }> => {
+export const createReply = async (commentId: string, content: string, token: string): Promise<{ reply: ReplyType }> => {
     try {
         const response = await axios.post(
             `${API_URL}/comment/${commentId}/reply`,
-            { content }, // Body JSON data
+            { content },
             {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`, // Token in headers
+                    Authorization: `Bearer ${token}`,
                 },
             }
         );
@@ -148,14 +154,14 @@ export const likeComment = async (commentId: string, token: string): Promise<{ s
     try {
         const response = await axios.post(
             `${API_URL}/comment/${commentId}/like`,
-            {}, // Empty body for POST request
+            {},
             {
                 headers: {
-                    Authorization: `Bearer ${token}`, // Token in headers
+                    Authorization: `Bearer ${token}`,
                 },
             }
         );
-        return response.data as { success: boolean; comment: CommentType };
+        return response.data as { success: boolean; comment: Comment };
     } catch (error) {
         console.error("Error liking comment:", error);
         throw error;
@@ -169,13 +175,49 @@ export const likeCommentReply = async (replyId: string, token: string): Promise<
             {}, // Empty body for POST request
             {
                 headers: {
-                    Authorization: `Bearer ${token}`, // Token in headers
+                    Authorization: `Bearer ${token}`,
                 },
             }
         );
-        return response.data as { success: boolean; comment: CommentType };
+        return response.data as { success: boolean; comment: Comment };
     } catch (error) {
         console.error("Error liking comment:", error);
         throw error;
     }
 };
+
+
+// Working on this
+export const deleteReply = async (replyId: string, token: string): Promise<{ success: boolean }> => {
+    try {
+        const response = await axios.delete(
+            `${API_URL}/comment/reply/${replyId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data as { success: boolean };
+    } catch (error) {
+        console.error("Error deleting reply:", error);
+        throw error;
+    }
+}
+
+export const deleteComment = async (commentId: string, token: string): Promise<{ success: boolean }> => {
+    try {
+        const response = await axios.delete(
+            `${API_URL}/comment/${commentId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data as { success: boolean };
+    } catch (error) {
+        console.error("Error deleting comment:", error);
+        throw error;
+    }
+}

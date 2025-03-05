@@ -1,10 +1,8 @@
-"use client"; // Add this if you're using Next.js
-
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ChartComponent } from "@/components/Analytics/ChartForViews";
-import { Card } from "@/components/ui/card"; // Shadcn Card
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; // Shadcn Avatar
+import { Card } from "@/components/ui/card"; 
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; 
 import { DepositDrawer } from "@/components/Wallet/Deposit";
 import { useEffect, useState } from "react";
 import { getUser } from "@/utils/storage";
@@ -14,13 +12,14 @@ import { Switch } from "@/components/ui/switch";
 import type { Wallet } from "@/Types/Wallet";
 import { WithdrawDrawer } from "@/components/Wallet/Withdraw";
 import { TransferDrawer } from "@/components/Wallet/Transfer";
+import { toast } from "sonner";
+import {AppError} from "@/Types/error"
 
 function Wallet() {
     const [wallet, setWallet] = useState<Wallet | null>(null);
     const [isActive, setIsActive] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const User = getUser().user;
-
-
 
     useEffect(() => {
         const fetchWallet = async () => {
@@ -30,12 +29,12 @@ function Wallet() {
                 setWallet(data);
             } catch (err) {
                 console.error(err);
+                const error = err as AppError;
+                setError(error.message);
             }
         };
-
         fetchWallet();
     }, [])
-    // Dummy Data
    
     const transactionHistory = [
         {
@@ -81,6 +80,8 @@ function Wallet() {
             },
         },
     ];
+
+    if (error) return toast(`${error}`);
 
     return (
         <div className="mt-20 text-white flex flex-col  py-5 px-4">
