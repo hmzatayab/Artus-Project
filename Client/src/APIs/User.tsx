@@ -45,7 +45,7 @@ export const getProfileData = async (token: string) => {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`, 
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -85,3 +85,61 @@ export const getUSers = async (token: string) => {
     throw error;
   }
 }
+
+export const followUnfollowUser = async (targetUserId: string, token: string) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/user/follow`,
+      { targetUserId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error in follow/unfollow API:", error);
+    throw error;
+  }
+};
+
+export const getFollowers = async (userId: string, token: string) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/user/${userId}/followers`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error in featch followers API:", error);
+    throw error;
+  }
+};
+
+export const userUpdate = async (formData: FormData, token: string) => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/user/update`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error in user update API:", error);
+    throw error;
+  }
+};

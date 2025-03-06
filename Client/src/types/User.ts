@@ -74,3 +74,10 @@ export interface UserContextType {
     user: User | null;
     setUser: (user: User | null) => void;
 }
+
+export interface FollowButtonProps {
+  userId: string;
+  token: string;
+  initialFollowersCount: number;
+  isFollowingInitially: boolean;
+}

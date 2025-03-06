@@ -26,7 +26,8 @@ export const PostActions = ({ post, userId, onPostUpdate }: PostActionsProps) =>
   const [loading, setLoading] = React.useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const token = getUser().token;
+  const data = getUser() || {};  
+const token = data?.token || ""; 
 
   const handleSave = async () => {
     try {
@@ -71,6 +72,19 @@ export const PostActions = ({ post, userId, onPostUpdate }: PostActionsProps) =>
     }
   };
 
+  const handleCopyLink = () => {
+    const postUrl = `${window.location.origin}/post/${post.id}`;
+
+    navigator.clipboard
+      .writeText(postUrl)
+      .then(() => {
+        toast.success("Link copied to clipboard!");
+      })
+      .catch(() => {
+        toast.error("Failed to copy link.");
+      });
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -86,7 +100,7 @@ export const PostActions = ({ post, userId, onPostUpdate }: PostActionsProps) =>
             <DropdownMenuItem className="cursor-pointer" onClick={() => setIsDialogOpen(true)}>Edit</DropdownMenuItem>
           )}
           {/* Copy Link Option */}
-          <DropdownMenuItem className="cursor-pointer">Copy link</DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer" onClick={handleCopyLink}>Copy link</DropdownMenuItem>
 
           {/* Delete Option (Only for post owner) */}
           {userId === post.user.id && (
@@ -96,7 +110,6 @@ export const PostActions = ({ post, userId, onPostUpdate }: PostActionsProps) =>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-
 
       {/* Edit Option (Only for post owner) */}
       {userId === post.user.id && (

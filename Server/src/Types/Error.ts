@@ -1,4 +1,3 @@
-// src/types/ErrorType.ts
 
 export interface AppError {
     message: string;

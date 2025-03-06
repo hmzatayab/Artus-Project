@@ -1,6 +1,10 @@
+import fs from "fs";
+import path from "path";
+
 import { Request, Response, RequestHandler } from "express";
 import prisma from "../config/DB";
 import * as userService from "../Services/user.services";
+import { AppError } from "../Types/Error";
 
 export const userRegister = async (req: Request, res: Response) => {
   try {
@@ -39,6 +43,50 @@ export const userLogout = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Logout successful" });
   } catch (error: any) {
     res.status(500).json({ message: "Logout failed", error: error.message });
+  }
+};
+
+export const userUpdate = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { image: true },
+    });
+
+    const { name, username, bio } = req.body;
+    let imageURL = user?.image;
+
+    if (req.file) {
+      imageURL = `${req.protocol}://${req.get("host")}/Images/${req.file.filename}`;
+
+      if (user?.image) {
+        const oldImagePath = path.join(__dirname, "../../Public/Images", path.basename(user.image));
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+    }
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        username,
+        bio,
+        image: imageURL, 
+      },
+    });
+
+    res.json({ message: "Profile updated successfully", user: updatedUser });
+  } catch (error) {
+    const err = error as AppError;
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Failed to update profile", error: err.message });
   }
 };
 
@@ -168,5 +216,54 @@ export const getAllUser = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching all users:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const followUser = async (req: Request, res: Response) => {
+  try {
+    const { targetUserId } = req.body;
+    const userId = (req as any).user?.userId;
+
+    if (!targetUserId) {
+      res.status(400).json({ error: "Target user ID is required." });
+      return;
+    }
+
+    const result = await userService.toggleFollowService(userId, targetUserId);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getUserFollowers = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { followers: true },
+    });
+
+    if (!user) {
+      res.status(404).json({ error: "User not found." });
+      return;
+    }
+
+    const followers = await prisma.user.findMany({
+      where: { id: { in: user.followers } },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        image: true,
+        followers: true,
+        identityVerified: true,
+      },
+    });
+
+    res.json({ followers });
+  } catch (error: any) {
+    res.status(500).json({ error: "Something went wrong." });
   }
 };

@@ -1,13 +1,11 @@
-"use client";
-
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { getAllPost, getPost } from "@/APIs/Post";
 import { formatDistanceToNow } from "date-fns";
 import { getUser } from "@/utils/storage";
-import { toast } from "sonner"
-import { Post } from "@/Types/Post"
+import { toast } from "sonner";
+import { Post } from "@/Types/Post";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,8 +16,9 @@ import PostCard from "@/components/PostCard";
 import CommentCard from "@/components/Comment";
 import { PostSkeleton } from "@/components/Skeleton/Post";
 import { PostCardSkeleton } from "@/components/Skeleton/PostCard";
-import { PostActions } from "@/components/PostActions"
-
+import { PostActions } from "@/components/PostActions";
+import LoadingIcon from "@/utils/Loading";
+import { followUnfollowUser } from "@/APIs/User";
 
 export default function PostPage() {
     const { postId } = useParams();
@@ -29,7 +28,39 @@ export default function PostPage() {
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState("comments");
 
-    const data = getUser();
+    const data = getUser() || {};
+    const token = data?.token;
+    const loggedInUserId = data?.user?.id;
+
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [followersCount, setFollowersCount] = useState(0);
+
+    useEffect(() => {
+        if (post && post.user) {
+            setIsFollowing(loggedInUserId ? post.user.followers.includes(loggedInUserId) : false);
+            setFollowersCount(post.user.followers.length);
+        }
+    }, [post, loggedInUserId]);
+
+    const handleFollow = async () => {
+        if (!token) return toast("You need to be logged in to follow users.");
+        if (!post) return;
+        if (post.user.id === loggedInUserId) return toast("You cannot follow yourself.");
+        setLoading(true);
+        try {
+            const response = (await followUnfollowUser(post.user.id, token)) as any;
+            if (response?.user?.followers) {
+                setIsFollowing(response.user.followers.includes(loggedInUserId));
+                setFollowersCount(response.user.followers.length);
+            } else {
+                toast(response?.message || "Failed to update follow status.");
+            }
+        } catch {
+            toast("Something went wrong. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -39,6 +70,8 @@ export default function PostPage() {
                 setPost(data);
             } catch (err) {
                 setError("Failed to fetch post");
+            } finally {
+                setLoading(false);
             }
         };
         fetchPost();
@@ -48,7 +81,7 @@ export default function PostPage() {
         const fetchPosts = async () => {
             try {
                 const data = await getAllPost();
-                setPosts(data.posts);
+                setPosts(data?.posts || []);
             } catch (err) {
                 setError("Failed to fetch posts");
             } finally {
@@ -59,8 +92,8 @@ export default function PostPage() {
     }, []);
 
     const handlePostUpdate = (updatedPost: Post) => {
-        setPost(updatedPost); // Update the post state
-      };
+        setPost(updatedPost);
+    };
 
     if (error) return toast(`${error}`);
 
@@ -84,7 +117,7 @@ export default function PostPage() {
                         <div className="w-full md:w-[70%] dark:bg-gray-950 bg-gray-200 border rounded-xl p-6 flex flex-col gap-3">
                             {/* User Profile Row */}
                             <div className="flex items-center justify-between lg:flex-row">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center lg:items-start gap-4">
                                     <Link to={`/profile/${post.user?.username}`}>
                                         <Avatar className="cursor-pointer w-15 h-15 outline-2 border-3 dark:border-gray-950 border-white outline-green-500 text-green-500">
                                             <AvatarImage src={post.user.image} alt="Profile" />
@@ -92,7 +125,7 @@ export default function PostPage() {
                                         </Avatar>
                                     </Link>
                                     <div>
-                                        <div className="flex  items-center gap-2">
+                                        <div className="flex items-center gap-2">
                                             <h4 className="text-lg font-semibold">{post.user.name}</h4>
                                             {post.user.identityVerified && (
                                                 <div>
@@ -124,20 +157,20 @@ export default function PostPage() {
                                             <p className="text-sm text-gray-400 italic">@{post.user.username}</p>
                                             <div className="flex items-center gap-2 text-sm text-gray-400">
                                                 <RiGroupLine size={12} />
-                                                <span>{post.user.followers.length}</span><span className="hidden lg:inline-block">followers</span>
+                                                <span>{followersCount}</span><span className="hidden lg:inline-block">Followers</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center gap-4">
-                                        <Button variant="outline" className="bg-transparent border-gray-700 cursor-pointer">
-                                            Follow
+                                        <Button onClick={handleFollow} variant="outline" disabled={loading} className="bg-transparent border-gray-700">
+                                            {loading ? <LoadingIcon /> : isFollowing ? "Unfollow" : "Follow"}
                                         </Button>
                                     </div>
                                 </div>
 
                                 <div>
-                                <PostActions post={post} userId={data?.user?.id} onPostUpdate={handlePostUpdate} />
+                                    <PostActions post={post} userId={loggedInUserId} onPostUpdate={handlePostUpdate} />
                                 </div>
                             </div>
 
@@ -145,7 +178,7 @@ export default function PostPage() {
                             <h1 className="text-2xl font-bold">{post.title}</h1>
 
                             {/* Description Section */}
-                            <p className=" leading-relaxed">{post.description}</p>
+                            <p className="leading-relaxed">{post.description}</p>
 
                             {/* Tags Section */}
                             <div className="flex flex-wrap gap-2">
@@ -168,21 +201,21 @@ export default function PostPage() {
                                 </div>
                             </div>
 
-                            {/* menu section  */}
+                            {/* Menu Section */}
                             <div className="flex flex-col justify-between">
                                 <div className="flex justify-between items-center p-2 dark:bg-[#050c1c] bg-white rounded-lg border mb-2">
                                     <div className="xs:flex xs:items-center xs:justify-around xs:w-full">
                                         <LikeButton
                                             postId={post.id}
                                             initialLikes={post.likes.length}
-                                            isInitiallyLiked={data?.user?.id && post?.likes ? post.likes.includes(data.user.id) : false}
+                                            isInitiallyLiked={loggedInUserId ? post.likes.includes(loggedInUserId) : false}
                                             color={"bg-black"}
                                         />
                                         <Button variant="outline" className="rounded-full ml-2 cursor-pointer dark:bg-black bg-gray-300" onClick={() => setActiveTab("comments")}>
                                             <RiChat1Line />
                                             {post.comments?.length || 0}
                                         </Button>
-                                        <Button variant="outline" className="rounded-full ml-2 cursor-pointer dark:bg-black bg-gray-300" >
+                                        <Button variant="outline" className="rounded-full ml-2 cursor-pointer dark:bg-black bg-gray-300">
                                             <RiBookmarkLine />
                                             {post.comments?.length || 0}
                                         </Button>
@@ -241,9 +274,10 @@ export default function PostPage() {
                         ) : (
                             <>
                                 {posts
-                                    .filter(post => post.isLive)
-                                    .map((post, index) => (
-                                        <PostCard key={index} post={post} />
+                                    .filter(post => post.isLive && post.id !== postId)
+                                    .slice(0, 8)
+                                    .map(post => (
+                                        <PostCard key={post.id} post={post} />
                                     ))}
                             </>
                         )}

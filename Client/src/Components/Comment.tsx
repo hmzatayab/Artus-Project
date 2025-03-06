@@ -15,7 +15,7 @@ import { Comment, ReplyType, CommentCardProps } from "@/Types/Comment";
 import { useNavigate } from "react-router-dom";
 import { CommentSkeleton } from "./Skeleton/Comment";
 
-const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUserName }) => {
+const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
     const [comments, setComments] = useState<Comment[]>([]);
     const [comment, setComment] = useState("");
     const [replyingTo, setReplyingTo] = useState<{ username: string; commentId: string } | null>(null); 
@@ -425,9 +425,9 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId, postUserImage, postUs
                 <Card className="px-1 py-3 lg:p-3 dark:bg-[#050c1c] bg-white">
                     <CardContent className="flex items-center gap-3">
                         <Avatar className="hidden lg:block">
-                            <AvatarImage src={postUserImage} alt="User" />
+                            <AvatarImage src={data.user.image} alt="User" />
                             <AvatarFallback>
-                                {postUserName
+                                {data.user.name
                                     .split(" ")
                                     .map((word: string) => word[0]) 
                                     .join("")

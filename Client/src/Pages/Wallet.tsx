@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ChartComponent } from "@/components/Analytics/ChartForViews";
-import { Card } from "@/components/ui/card"; 
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; 
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { DepositDrawer } from "@/components/Wallet/Deposit";
 import { useEffect, useState } from "react";
 import { getUser } from "@/utils/storage";
@@ -13,13 +13,17 @@ import type { Wallet } from "@/Types/Wallet";
 import { WithdrawDrawer } from "@/components/Wallet/Withdraw";
 import { TransferDrawer } from "@/components/Wallet/Transfer";
 import { toast } from "sonner";
-import {AppError} from "@/Types/error"
+import { AppError } from "@/Types/error"
+import { RiArrowGoBackLine } from "@remixicon/react";
+import { Button } from "@/components/ui/button";
 
 function Wallet() {
     const [wallet, setWallet] = useState<Wallet | null>(null);
     const [isActive, setIsActive] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const User = getUser().user;
+
+    const Navigate = useNavigate();
 
     useEffect(() => {
         const fetchWallet = async () => {
@@ -35,7 +39,7 @@ function Wallet() {
         };
         fetchWallet();
     }, [])
-   
+
     const transactionHistory = [
         {
             _id: "1",
@@ -85,18 +89,29 @@ function Wallet() {
 
     return (
         <div className="mt-20 text-white flex flex-col  py-5 px-4">
-            <Card className="relative w-full p-6  text-white shadow-lg rounded-2xl overflow-hidden mb-4">
+            <Card className="relative w-full p-6 text-white shadow-lg rounded-2xl overflow-hidden mb-4">
                 {/* Glowing Effect */}
                 <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-indigo-500 to-cyan-500 opacity-20 rounded-full blur-3xl"></div>
                 <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-20 rounded-full blur-3xl"></div>
 
-                {/* Card Content */}
-                <div className="flex justify-between items-center">
+                {/* Card Content with High z-index */}
+                <div className="relative z-10 flex justify-between items-center">
                     {/* Left: Toggle Button */}
-                    <div className="">
-                        <p className="text-4xl font-light">Hi<span className="font-bold ml-2">{User.name}</span></p>
-                        <p className="text-sm text-gray-400 italic"><span className="font-bold">Wallet ID</span> #{wallet?.wallet ? wallet.wallet.walletId : "Loading..."}
-                        </p>
+                    <div className="flex items-center gap-4">
+                        <Link to={"/dashboard"}>
+                            <Button variant={"outline"} className="cursor-pointer">
+                                <RiArrowGoBackLine />
+                            </Button>
+                        </Link>
+                        <div>
+                            <p className="text-4xl font-light">
+                                Hi<span className="font-bold ml-2">{User.name}</span>
+                            </p>
+                            <p className="text-sm text-gray-400 italic">
+                                <span className="font-bold">Wallet ID</span> #
+                                {wallet?.wallet ? wallet.wallet.walletId : "Loading..."}
+                            </p>
+                        </div>
                     </div>
 
                     {/* Right: User Info */}
@@ -110,6 +125,7 @@ function Wallet() {
                     </div>
                 </div>
             </Card>
+
             {/* Main Grid */}
             <div className="w-full max-w-full p-10 grid grid-cols-1 lg:grid-cols-3 gap-8 dark:bg-gray-950 rounded-xl outline">
                 {/* Left Section: Wallet Actions */}
@@ -154,13 +170,13 @@ function Wallet() {
                     </Card>
 
                     {/* Withdraw Card */}
-                    <WithdrawDrawer/>
+                    <WithdrawDrawer />
 
                     {/* Deposit Card */}
                     <DepositDrawer />
 
                     {/* Transfer Funds Card */}
-                    <TransferDrawer/>
+                    <TransferDrawer />
                 </div>
 
                 {/* Right Section: Transactions */}
