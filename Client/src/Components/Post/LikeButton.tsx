@@ -3,8 +3,8 @@ import { likePost } from "@/APIs/Post";
 import { Button } from "@/components/ui/button";
 import { RiHeartLine, RiHeartFill } from "@remixicon/react";
 import { toast } from "sonner";
-import { getUser } from "@/utils/storage";
-import { formatCount } from "@/utils/formatNumber";
+import { getUser } from "@/utils/Storage";
+import { formatCount } from "@/utils/FormatNumber";
 import { LikeButtonProps } from "@/Types/Post";
 
 

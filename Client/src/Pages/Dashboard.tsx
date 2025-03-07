@@ -3,16 +3,19 @@ import { Link } from "react-router-dom"
 import { RiBookmarkFill, RiLayoutGridFill, RiLineChartLine, RiTrophyFill, RiVerifiedBadgeFill } from "@remixicon/react";
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
-import PostCard from "@/components/PostCard";
+import PostCard from "@/components/Post/PostCard";
 import { toast } from "sonner"
 import { getUserPosts } from "@/APIs/Post";
-import { getUser } from "@/utils/storage";
-import { PostCardSkeleton } from "@/components/Skeleton/PostCard";
+import { getUser } from "@/utils/Storage";
+import { PostCardSkeleton } from "@/components/Other/Skeleton/PostCard";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { AlertTriangle, CalendarIcon } from "lucide-react";
-import { ChartComponent } from "@/components/Analytics/ChartForViews"
-import UserUpdateDialog from "@/components/UserUpdateDialog";
+import { ChartComponent } from "@/components/Other/Analytics/ChartForViews"
+import UserUpdateDialog from "@/components/Other/User/UserUpdateDialog";
 import { Button } from "@/components/ui/button";
+import { getTransactions, getWallet } from "@/APIs/Wallet";
+import { TransactionsResponse, Wallet } from "@/Types/Wallet";
+import { AppError } from "@/Types/error";
 
 const menuOptions = [
   { name: "All Posts", icon: <RiLayoutGridFill size={20} /> },
@@ -25,11 +28,15 @@ const menuOptions = [
 function Profile() {
   const [selectedTab, setSelectedTab] = useState("All Posts");
   const [posts, setPosts] = useState([]); // State for storing posts
+  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [transactions, setTransactions] = useState<TransactionsResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const data = getUser();
-  const userId = data.user.id
+  const userId = data?.user?.id
+  const token = data?.token
+  const walletId = wallet?.wallet.id;
 
 
   useEffect(() => {
@@ -51,6 +58,83 @@ function Profile() {
     toast.success("Verification link sent to your email!");
   };
 
+  useEffect(() => {
+    const fetchWallet = async () => {
+      try {
+        const data = await getWallet(token);
+        setWallet(data);
+      } catch (err) {
+        console.error(err);
+        const error = err as AppError;
+        setError(error.message);
+      }
+    };
+    fetchWallet();
+  }, [])
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        if (!walletId) {
+          console.error("walletId is undefined");
+          return;
+        }
+        const res = await getTransactions(token, walletId);
+        setTransactions(res.data);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    };
+
+    fetchTransactions();
+  }, [walletId]);
+
+  const transactionData = transactions.reduce((acc, transaction: any) => {
+    const date = transaction.createdAt.split("T")[0];
+    if (!acc[date]) {
+      acc[date] = {
+        date,
+        totalAmount: 0,
+        totalTransactions: 0,
+        totalWithdrawals: 0,
+        totalDeposits: 0,
+        totalTransfers: 0,
+        totalWithdrawalsAmount: 0,
+        totalDepositsAmount: 0,
+        totalTransfersAmount: 0,
+      };
+    }
+
+    acc[date].totalAmount += transaction.amount;
+
+    acc[date].totalTransactions += 1;
+
+    if (transaction.type === "withdraw") {
+      acc[date].totalWithdrawals += 1;
+      acc[date].totalWithdrawalsAmount += transaction.amount;
+    } else if (transaction.type === "deposit") {
+      acc[date].totalDeposits += 1;
+      acc[date].totalDepositsAmount += transaction.amount;
+    } else if (transaction.type === "transfer") {
+      acc[date].totalTransfers += 1;
+      acc[date].totalTransfersAmount += transaction.amount;
+    }
+
+    return acc;
+  }, {} as Record<string, {
+    date: string;
+    totalAmount: number;
+    totalTransactions: number;
+    totalWithdrawals: number;
+    totalDeposits: number;
+    totalTransfers: number;
+    totalWithdrawalsAmount: number;
+    totalDepositsAmount: number;
+    totalTransfersAmount: number;
+  }>);
+
+  const transformedData = Object.values(transactionData);
+
   if (error) return toast(`${error}`);
 
   return (
@@ -58,27 +142,27 @@ function Profile() {
       <div className=" mt-20">
         {!data?.user?.isEmailVerified && (
           <div className="mx-8">
-          <Card className="w-full shadow-lg py-0 ">
-            <CardContent className="p-5 flex flex-col lg:flex-row items-center justify-between">
-              <div className="flex flex-col lg:flex-row items-center justify-center gap-4">
-                <AlertTriangle className="text-yellow-600 dark:text-yellow-300 w-7 h-7" />
-                <div>
-                  <p className="font-semibold text-yellow-800 dark:text-yellow-200 text-lg">
-                    Verify Your Email
-                  </p>
-                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                    Please verify your email address to unlock all features.
-                  </p>
+            <Card className="w-full shadow-lg py-0 ">
+              <CardContent className="p-5 flex flex-col lg:flex-row items-center justify-between">
+                <div className="flex flex-col lg:flex-row items-center justify-center gap-4">
+                  <AlertTriangle className="text-yellow-600 dark:text-yellow-300 w-7 h-7" />
+                  <div>
+                    <p className="font-semibold text-yellow-800 dark:text-yellow-200 text-lg">
+                      Verify Your Email
+                    </p>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                      Please verify your email address to unlock all features.
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <Button
-                onClick={handleSendVerificationLink}
-                className="bg-yellow-500 hover:bg-yellow-600 mt-3 lg:mt-0"
-              >
-                Send Verification Link
-              </Button>
-            </CardContent>
-          </Card>
+                <Button
+                  onClick={handleSendVerificationLink}
+                  className="bg-yellow-500 hover:bg-yellow-600 mt-3 lg:mt-0"
+                >
+                  Send Verification Link
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -97,8 +181,8 @@ function Profile() {
             <div className="text-center lg:text-left">
               <div className="flex items-center justify-center lg:justify-start">
                 <div className="flex items-center space-x-1">
-                  <h1 className="text-3xl md:text-4xl font-bold ">{data.user.name || "Anonymous"}</h1>
-                  {data.user.identityVerified && (
+                  <h1 className="text-3xl md:text-4xl font-bold ">{data?.user.name || "Anonymous"}</h1>
+                  {data?.user.identityVerified && (
                     <div>
                       <HoverCard>
                         <HoverCardTrigger>
@@ -107,7 +191,7 @@ function Profile() {
                         <HoverCardContent>
                           <div className="flex justify-between space-x-4">
                             <div className="space-y-1">
-                              <h4 className="text-sm font-semibold">@{data.user.username}</h4>
+                              <h4 className="text-sm font-semibold">@{data?.user.username}</h4>
                               <p className="text-sm">
                                 The React Framework – created and maintained by @vercel.
                               </p>
@@ -133,12 +217,12 @@ function Profile() {
                   {/* <i className="ri-edit-2-fill text-white text-2xl"></i> */}
                 </Link>
               </div>
-              <p className="text-xs md:text-sm  italic mt-2">{data.user.email || "example@gmail.com"}</p>
+              <p className="text-xs md:text-sm  italic mt-2">{data?.user.email || "example@gmail.com"}</p>
 
               {/* Bio Section */}
               <div className="mt-4 max-w-md">
                 <p className="text-sm">
-                  {data.user.bio || "No Bio Available"}
+                  {data?.user.bio || "No Bio Available"}
                 </p>
               </div>
             </div>
@@ -199,24 +283,27 @@ function Profile() {
           </div>
 
           {selectedTab === "All Posts" ? (
-            <div className=" lg:mx-8 lg:mt-4 mb-8 p-5 lg:p-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {loading ? (
-                  <>
-                    <PostCardSkeleton />
-                    <PostCardSkeleton />
-                    <PostCardSkeleton />
-                    <PostCardSkeleton />
-                  </>
-                ) : (
-                  <>
-                    {posts.map((post, index) => (
-                      <PostCard key={index} post={post} />
-                    ))}
-                  </>
-                )}
-              </div>
+            <div className="lg:mx-8 lg:mt-4 mb-8 p-5 lg:p-0">
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <PostCardSkeleton />
+                  <PostCardSkeleton />
+                  <PostCardSkeleton />
+                  <PostCardSkeleton />
+                </div>
+              ) : posts.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {posts.map((post, index) => (
+                    <PostCard key={index} post={post} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-400 text-xl font-semibold mt-10">
+                  No Posts Found.
+                </div>
+              )}
             </div>
+
           ) : selectedTab === "Auctions" ? (
             <div>
               <div className="lg:mx-8 mt-4 mb-8">Auctions Posts</div>
@@ -229,7 +316,31 @@ function Profile() {
             <div>
               {/* <div className="lg:mx-8 mt-4 mb-8">Lost Auction Posts</div> */}
               <div className="lg:mx-8 mt-4 mb-8 p-5 lg:p-0">
-                <ChartComponent />
+                <ChartComponent
+                  data={transformedData}
+                  title="Transaction Chart"
+                  description="Showing total transactions, amount, withdrawals, deposits, and transfers per day"
+                  dataKeys={[
+                    "totalAmount",
+                    "totalTransactions",
+                    "totalWithdrawals",
+                    "totalDeposits",
+                    "totalTransfers",
+                    "totalWithdrawalsAmount",
+                    "totalDepositsAmount",
+                    "totalTransfersAmount",
+                  ]}
+                  colors={[
+                    "#4287f5", // Total Amount
+                    "#34d399", // Total Transactions
+                    "#ef4444", // Total Withdrawals
+                    "#f59e0b", // Total Deposits
+                    "#8b5cf6", // Total Transfers
+                    "#dc2626", // Total Withdrawals Amount
+                    "#d97706", // Total Deposits Amount
+                    "#7c3aed", // Total Transfers Amount
+                  ]}
+                />
               </div>
             </div>
           ) : null}

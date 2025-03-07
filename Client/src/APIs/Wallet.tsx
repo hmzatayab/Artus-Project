@@ -77,3 +77,21 @@ export const getWallet = async (token: string): Promise<any> => {
         throw error;
     }
 };
+
+export const getTransactions = async (token: string, walletId: string): Promise<any> => {
+    try {
+        const response = await axios.get(
+            `${API_URL}/wallet/${walletId}/transactions`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in wallet API:", error);
+        throw error;
+    }
+};

@@ -3,12 +3,13 @@ import { Toaster } from "@/components/ui/sonner"
 import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
-import Header from "./components/Header";
+import Header from "./components/Home/Header";
 import Dashboard from "./Pages/Dashboard";
 import Followers from "./Pages/Followers";
 import Post from "./Pages/Post";
-import NotFound from "./components/NotFound404";
+import NotFound from "./components/Errors/NotFound404";
 import Wallet from "./Pages/Wallet";
+import { UserProtectWrapper, UserRedirectWrapper } from "./components/Private/ProtectWrapper";
 
 function App() {
   return (
@@ -24,7 +25,7 @@ function MainLayout() {
 
   const shouldHideHeader = () => {
     const hideHeaderPaths = ["/login", "/register"];
-    const dynamicRouteRegex = /^\/invoice\/[^/]+$/; 
+    const dynamicRouteRegex = /^\/invoice\/[^/]+$/;
 
     return hideHeaderPaths.includes(location.pathname) || dynamicRouteRegex.test(location.pathname);
   };
@@ -34,12 +35,12 @@ function MainLayout() {
       {!shouldHideHeader() && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/login" element={<UserRedirectWrapper><Login /></UserRedirectWrapper>} />
+        <Route path="/register" element={<UserRedirectWrapper><Register /></UserRedirectWrapper>} />
+        <Route path="/dashboard" element={<UserProtectWrapper><Dashboard /></UserProtectWrapper>} />
         <Route path="/Followers" element={<Followers />} />
-        <Route path="/post/:postId" element={<Post/>}/>
-        <Route path="/wallet" element={<Wallet/>}/>
+        <Route path="/post/:postId" element={<Post />} />
+        <Route path="/wallet" element={<UserProtectWrapper><Wallet /></UserProtectWrapper>} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -3,12 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RiCameraLine } from "@remixicon/react";
-import { getUser, saveUser } from "@/utils/storage";
+import { getUser, saveUser } from "@/utils/Storage";
 import { userUpdate } from "@/APIs/User";
 import { toast } from "sonner";
-import { Textarea } from "./ui/textarea";
+import { Textarea } from "../../ui/textarea";
 import { AppError } from "@/Types/error";
 import LoadingIcon from "@/utils/Loading";
+import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 
 function UserUpdateDialog() {
     const [user, setUser] = useState(getUser() || {});
@@ -40,6 +41,25 @@ function UserUpdateDialog() {
         const token = getUser()?.token;
         if (!token) {
             toast("You need to be logged in to update your profile.");
+            setLoading(false);
+            return;
+        }
+
+        if (username.length < 4 || username.length > 20) {
+            toast("Username must be between 4 to 20 characters.");
+            setLoading(false);
+            return;
+        }
+
+        if (name.length < 5 || name.length > 20) {
+            toast("Name must be between 5 to 20 characters.");
+            setLoading(false);
+            return;
+        }
+
+        if (bio.length < 100 || bio.length > 180) {
+            toast("Bio must be between 100 to 180 characters.");
+            setLoading(false);
             return;
         }
 
@@ -55,7 +75,7 @@ function UserUpdateDialog() {
             const response = (await userUpdate(formData, token)) as any;
             if (response) {
                 toast("Profile updated successfully!");
-                
+
                 const updatedImageURL = response.user?.image || previewImage;
 
                 const updatedUser = {
@@ -86,11 +106,15 @@ function UserUpdateDialog() {
         <Dialog>
             <DialogTrigger>
                 <div className="relative w-32 h-32">
-                    <img
+                    {/* <img
                         src={user?.image || user.user.image}
                         alt="User Profile"
                         className="w-32 h-32 rounded-full outline-3 border-4 dark:border-gray-950 border-white outline-green-500"
-                    />
+                    /> */}
+                    <Avatar className="cursor-pointer w-32 h-32 outline-2 border-3 dark:border-gray-950 border-white outline-green-500 text-green-500">
+                        <AvatarImage src={user?.image || user?.user?.image} alt="Profile" />
+                        <AvatarFallback className="text-green-500 text-4xl">{user?.user?.name.split(" ")[0].slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
                     <div className="absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-full opacity-0 hover:opacity-100 transition-all duration-300 cursor-pointer">
                         <RiCameraLine size={24} />
                     </div>
@@ -102,11 +126,15 @@ function UserUpdateDialog() {
                 </DialogHeader>
                 <div className="flex flex-col items-center gap-4">
                     <div className="relative w-24 h-24 rounded-full overflow-hidden">
-                        <img
+                        {/* <img
                             src={previewImage}
                             alt="User Profile"
                             className="w-24 h-24 rounded-full object-cover"
-                        />
+                        /> */}
+                        <Avatar className="cursor-pointer w-24 h-24">
+                            <AvatarImage src={previewImage} alt="Profile" />
+                            <AvatarFallback className="text-green-500 text-4xl">{user?.user?.name.split(" ")[0].slice(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
                         <label className="absolute bottom-2 right-2 bg-gray-800 p-1 rounded-full cursor-pointer">
                             <RiCameraLine size={18} className="text-white" />
                             <input

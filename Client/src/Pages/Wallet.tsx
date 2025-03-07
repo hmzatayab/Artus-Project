@@ -1,17 +1,17 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { ChartComponent } from "@/components/Analytics/ChartForViews";
+import { ChartComponent } from "@/components/Other/Analytics/ChartForViews";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { DepositDrawer } from "@/components/Wallet/Deposit";
+import { DepositDrawer } from "@/components/Other/Wallet/Deposit";
 import { useEffect, useState } from "react";
-import { getUser } from "@/utils/storage";
-import { getWallet } from "@/APIs/Wallet";
+import { getUser } from "@/utils/Storage";
+import { getTransactions, getWallet } from "@/APIs/Wallet";
 import { Switch } from "@/components/ui/switch";
-// import { TransactionHistorySkeleton } from "@/components/Skeleton/Transactions";
-import type { Wallet } from "@/Types/Wallet";
-import { WithdrawDrawer } from "@/components/Wallet/Withdraw";
-import { TransferDrawer } from "@/components/Wallet/Transfer";
+import { TransactionHistorySkeleton } from "@/components/Other/Skeleton/Transactions";
+import type { Wallet, TransactionsResponse } from "@/Types/Wallet";
+import { WithdrawDrawer } from "@/components/Other/Wallet/Withdraw";
+import { TransferDrawer } from "@/components/Other/Wallet/Transfer";
 import { toast } from "sonner";
 import { AppError } from "@/Types/error"
 import { RiArrowGoBackLine } from "@remixicon/react";
@@ -19,16 +19,19 @@ import { Button } from "@/components/ui/button";
 
 function Wallet() {
     const [wallet, setWallet] = useState<Wallet | null>(null);
+    const [transactions, setTransactions] = useState<TransactionsResponse[]>([]);
     const [isActive, setIsActive] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     const User = getUser().user;
+    const token = getUser().token;
 
-    const Navigate = useNavigate();
+    const walletId = wallet?.wallet.id;
+    console.log(transactions);
 
     useEffect(() => {
         const fetchWallet = async () => {
             try {
-                const token = getUser().token;
                 const data = await getWallet(token);
                 setWallet(data);
             } catch (err) {
@@ -40,50 +43,72 @@ function Wallet() {
         fetchWallet();
     }, [])
 
-    const transactionHistory = [
-        {
-            _id: "1",
-            type: "deposit",
-            amount: 500,
-            createdAt: "2024-05-01T10:00:00Z",
-            wallet: {
-                user: {
-                    name: "John Doe",
-                    image: "https://via.placeholder.com/150",
-                },
-            },
-        },
-        {
-            _id: "2",
-            type: "withdraw",
-            amount: 200,
-            createdAt: "2024-05-02T12:00:00Z",
-            wallet: {
-                user: {
-                    name: "Jane Smith",
-                    image: "https://via.placeholder.com/150",
-                },
-            },
-        },
-        {
-            _id: "3",
-            type: "transfer",
-            amount: 100,
-            createdAt: "2024-05-03T14:00:00Z",
-            wallet: {
-                user: {
-                    name: "Alice Johnson",
-                    image: "https://via.placeholder.com/150",
-                },
-            },
-            recipientWallet: {
-                user: {
-                    name: "Bob Brown",
-                    image: "https://via.placeholder.com/150",
-                },
-            },
-        },
-    ];
+    useEffect(() => {
+        const fetchTransactions = async () => {
+            setIsLoading(true);
+            try {
+                if (!walletId) {
+                    console.error("walletId is undefined");
+                    return;
+                }
+                const res = await getTransactions(token, walletId);
+                setTransactions(res.data);
+            } catch (error) {
+                console.error("Error fetching transactions:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchTransactions();
+    }, [walletId]);
+
+    
+    const transactionData = transactions.reduce((acc, transaction: any) => {
+        const date = transaction.createdAt.split("T")[0]; 
+        if (!acc[date]) {
+            acc[date] = {
+                date,
+                totalAmount: 0,
+                totalTransactions: 0,
+                totalWithdrawals: 0,
+                totalDeposits: 0,
+                totalTransfers: 0,
+                totalWithdrawalsAmount: 0,
+                totalDepositsAmount: 0,
+                totalTransfersAmount: 0,
+            };
+        }
+        
+        acc[date].totalAmount += transaction.amount;
+        
+        acc[date].totalTransactions += 1;
+        
+        if (transaction.type === "withdraw") {
+            acc[date].totalWithdrawals += 1;
+            acc[date].totalWithdrawalsAmount += transaction.amount;
+        } else if (transaction.type === "deposit") {
+            acc[date].totalDeposits += 1;
+            acc[date].totalDepositsAmount += transaction.amount;
+        } else if (transaction.type === "transfer") {
+            acc[date].totalTransfers += 1;
+            acc[date].totalTransfersAmount += transaction.amount;
+        }
+
+        return acc;
+    }, {} as Record<string, {
+        date: string;
+        totalAmount: number;
+        totalTransactions: number;
+        totalWithdrawals: number;
+        totalDeposits: number;
+        totalTransfers: number;
+        totalWithdrawalsAmount: number;
+        totalDepositsAmount: number;
+        totalTransfersAmount: number;
+    }>);
+
+    const transformedData = Object.values(transactionData);
 
     if (error) return toast(`${error}`);
 
@@ -99,7 +124,7 @@ function Wallet() {
                     {/* Left: Toggle Button */}
                     <div className="flex items-center gap-4">
                         <Link to={"/dashboard"}>
-                            <Button variant={"outline"} className="cursor-pointer">
+                            <Button variant={"outline"} className="cursor-pointer bg-transparent">
                                 <RiArrowGoBackLine />
                             </Button>
                         </Link>
@@ -145,7 +170,7 @@ function Wallet() {
                         <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-indigo-500 to-cyan-500 opacity-20 rounded-full blur-3xl"></div>
                         <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-20 rounded-full blur-3xl"></div>
                         <h2 className="text-4xl font-bold relative">
-                            {transactionHistory.length}
+                            {transactions.length}
                         </h2>
                         <p className="text-gray-400 mt-2 relative">Total Transactions</p>
                     </Card>
@@ -157,8 +182,8 @@ function Wallet() {
                         <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-pink-500 to-red-500 opacity-20 rounded-full blur-3xl"></div>
                         <h2 className="text-4xl font-bold relative">
                             $
-                            {transactionHistory.reduce(
-                                (total, transaction) =>
+                            {transactions.reduce(
+                                (total, transaction: any) =>
                                     transaction.type === "withdraw" ||
                                         transaction.type === "transfer"
                                         ? total + transaction.amount
@@ -187,28 +212,31 @@ function Wallet() {
 
                     {/* Transaction History Content */}
                     <h3 className="text-xl font-bold">Transaction History</h3>
-                    <div className="space-y-2 overflow-y-auto max-h-[300px] pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
-                        {transactionHistory.length > 0 ? (
-                            transactionHistory.map((transaction) => (
-                                <Link to={`/invoice/${transaction._id}`} key={transaction._id}>
+                    <div className="space-y-2 overflow-y-auto max-h-[360px] pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
+                        {isLoading ? (
+                            <TransactionHistorySkeleton />
+                        ) : transactions.length > 0 ? (
+                            // Render actual transactions
+                            transactions.map((transaction: any) => (
+                                <Link to={`/invoice/${transaction.transactionId}`} key={transaction.transactionId}>
                                     <Card className="flex flex-col sm:flex-row items-center sm:justify-between bg-gray-950 p-4 rounded-lg hover:bg-gray-600 transition mt-2">
                                         {/* Left Section - User Details */}
                                         <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-                                            {transaction.type === "transfer" ? (
+                                            {transaction.type === 'transfer' ? (
                                                 <div className="flex items-center space-x-2 sm:space-x-4 w-full">
                                                     {/* Sender */}
                                                     <div className="flex items-center space-x-2">
                                                         <Avatar>
                                                             <AvatarImage
-                                                                src={transaction.wallet.user.image}
+                                                                src={transaction.fromUser?.image}
                                                                 alt="Sender Profile"
                                                             />
                                                             <AvatarFallback>
-                                                                {transaction.wallet.user?.name?.charAt(0) || "U"}
+                                                                {transaction.fromUser?.name?.charAt(0) || 'U'}
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         <p className="text-sm sm:text-base font-semibold truncate max-w-[100px] sm:max-w-none">
-                                                            {transaction.wallet.user?.name || "Unknown"}
+                                                            {transaction.fromUser?.name || 'Unknown'}
                                                         </p>
                                                     </div>
 
@@ -218,19 +246,15 @@ function Wallet() {
                                                     <div className="flex items-center space-x-2">
                                                         <Avatar>
                                                             <AvatarImage
-                                                                src={
-                                                                    transaction.recipientWallet?.user?.image ||
-                                                                    "/default-avatar.png"
-                                                                }
+                                                                src={transaction.toUser?.image || '/default-avatar.png'}
                                                                 alt="Recipient Profile"
                                                             />
                                                             <AvatarFallback>
-                                                                {transaction.recipientWallet?.user?.name?.charAt(0) || "U"}
+                                                                {transaction.toUser?.name?.charAt(0) || 'U'}
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         <p className="text-sm sm:text-base font-semibold truncate max-w-[100px] sm:max-w-none">
-                                                            {transaction.recipientWallet?.user?.name ||
-                                                                "Unknown"}
+                                                            {transaction.toUser?.name || 'Unknown'}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -238,16 +262,16 @@ function Wallet() {
                                                 <div className="flex items-center space-x-2">
                                                     <Avatar>
                                                         <AvatarImage
-                                                            src={transaction.wallet.user.image}
+                                                            src={User?.image || ''}
                                                             alt="Profile"
                                                         />
                                                         <AvatarFallback>
-                                                            {transaction.wallet.user?.name?.charAt(0) || "U"}
+                                                            {User?.name?.charAt(0) || 'U'}
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div>
                                                         <p className="text-sm sm:text-base font-semibold">
-                                                            {transaction.wallet.user?.name || "Unknown User"}
+                                                            {User?.name || 'Unknown User'}
                                                         </p>
                                                         <p className="text-xs sm:text-sm text-gray-400">
                                                             {transaction.type.charAt(0).toUpperCase() +
@@ -261,18 +285,18 @@ function Wallet() {
                                         {/* Right Section - Amount & Time */}
                                         <div className="flex flex-col items-end text-right w-full sm:w-auto mt-2 sm:mt-0">
                                             <div
-                                                className={`font-bold ${transaction.type === "deposit"
-                                                    ? "text-green-400"
-                                                    : transaction.type === "transfer"
-                                                        ? "text-yellow-400"
-                                                        : "text-red-400"
+                                                className={`font-bold ${transaction.type === 'deposit'
+                                                    ? 'text-green-400'
+                                                    : transaction.type === 'transfer'
+                                                        ? 'text-yellow-400'
+                                                        : 'text-red-400'
                                                     }`}
                                             >
-                                                {transaction.type === "deposit"
-                                                    ? "+ "
-                                                    : transaction.type === "transfer"
-                                                        ? "⇄ "
-                                                        : "- "}
+                                                {transaction.type === 'deposit'
+                                                    ? '+ '
+                                                    : transaction.type === 'transfer'
+                                                        ? '⇄ '
+                                                        : '- '}
                                                 ${transaction.amount}
                                             </div>
                                             <p className="text-xs font-normal text-gray-400">
@@ -345,7 +369,31 @@ function Wallet() {
                     <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-blue-500 to-green-500 opacity-20 rounded-full blur-3xl"></div>
 
                     {/* Chart Component */}
-                    <ChartComponent />
+                    <ChartComponent
+                        data={transformedData}
+                        title="Transaction Chart"
+                        description="Showing total transactions, amount, withdrawals, deposits, and transfers per day"
+                        dataKeys={[
+                            "totalAmount",
+                            "totalTransactions",
+                            "totalWithdrawals",
+                            "totalDeposits",
+                            "totalTransfers",
+                            "totalWithdrawalsAmount",
+                            "totalDepositsAmount",
+                            "totalTransfersAmount",
+                        ]} 
+                        colors={[
+                            "#4287f5", // Total Amount
+                            "#34d399", // Total Transactions
+                            "#ef4444", // Total Withdrawals
+                            "#f59e0b", // Total Deposits
+                            "#8b5cf6", // Total Transfers
+                            "#dc2626", // Total Withdrawals Amount
+                            "#d97706", // Total Deposits Amount
+                            "#7c3aed", // Total Transfers Amount
+                        ]} 
+                    />
                 </Card>
             </div>
         </div>

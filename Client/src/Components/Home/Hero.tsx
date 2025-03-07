@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom"
-import "../index.css"
-import { Button } from "./ui/button"
-import { useTheme } from "@/components/DarkMode/theme-provider"
+import "../../index.css"
+import { useTheme } from "@/components/Theme/theme-provider"
+import { Button } from "../ui/button"
 
 function Hero() {
     const { theme } = useTheme()

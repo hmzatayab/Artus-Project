@@ -36,10 +36,9 @@ export interface User {
   referralCode: string;
   referredBy: string[];
   isLive: boolean;
-  walletIsActive: boolean;
   emailVerified: boolean;
   isBlocked: boolean;
-  wallet?: Wallet;
+  wallet?: Wallet[];
   passwordResetToken?: string;
   passwordResetTokenExpiry?: Date;
   identityVerified: boolean;

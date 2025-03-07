@@ -1,4 +1,4 @@
-import UserCard from "@/components/UserCard"
+import UserCard from "@/components/Other/User/UserCard"
 
 function Followers() {
     return (

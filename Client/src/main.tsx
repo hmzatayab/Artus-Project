@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { UserProvider } from './Context/UserContext.tsx'
 import './index.css'
 import App from './App.tsx'
-import { ThemeProvider } from "@/components/DarkMode/theme-provider.tsx"
+import { ThemeProvider } from "@/components/Theme/theme-provider.tsx"
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

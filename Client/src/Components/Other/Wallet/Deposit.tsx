@@ -4,41 +4,71 @@ import * as React from "react";
 import { Minus, Plus, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
-import { Card } from "../ui/card";
-import { withdrawAmount } from "@/APIs/Wallet";
-import { getUser } from "@/utils/storage";
+import { Card } from "../../ui/card";
+import { depositAmount } from "@/APIs/Wallet";
+import { getUser } from "@/utils/Storage";
 import { toast } from "sonner"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "../../ui/dialog";
 import LoadingIcon from "@/utils/Loading";
 
-export function WithdrawDrawer() {
+export function DepositDrawer() {
     const [amount, setAmount] = React.useState(50);
     const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
     const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
 
     const data = getUser();
+    const user = data.user;
     const token = data.token;
 
     function onClick(adjustment: any) {
         setAmount(Math.max(10, Math.min(1000, amount + adjustment)));
     }
 
-    const handleWithdraw = async () => {
-        setLoading(true); 
+    const handleDeposit = async () => {
+        setLoading(true);
+        if (!user) {
+            toast.error("User not found");
+            setLoading(false);
+            return;
+        }
+
+        if (!user.isEmailVerified) {
+            toast.error("Email not verified. Please verify your email first.");
+            setLoading(false);
+            return;
+        }
+
+        if (!user.wallet?.isActive) {
+            toast.error("Transaction failed because your wallet is not active.");
+            setLoading(false);
+            return;
+        }
+
+        if (user.isBlocked) {
+            toast.error("Your account is blocked. Please contact support.");
+            setLoading(false);
+            return;
+        }
+
+        if (!user.wallet) {
+            toast.error("Wallet not found.");
+            setLoading(false);
+            return;
+        }
         try {
-            await withdrawAmount(amount, token); 
+            await depositAmount(amount, token);
             setIsConfirmDialogOpen(false);
-            setIsSuccessDialogOpen(true); 
-            toast.success("Withdrawal Successful");
+            setIsSuccessDialogOpen(true);
+            toast.success("Deposit Successful");
         } catch (err) {
-            toast.error(`Failed to withdraw ${err || "Something went wrong!"}`);
+            toast.error(`Failed to deposit ${err || "Something went wrong!"}`);
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
-    const handleConfirmWithdraw = () => {
+    const handleConfirmDeposit = () => {
         setIsConfirmDialogOpen(true);
     };
 
@@ -49,15 +79,15 @@ export function WithdrawDrawer() {
                     <Card className="cursor-pointer relative p-6 rounded-xl shadow-lg border border-gray-700 hover:shadow-2xl hover:scale-105 transition transform h-36">
                         <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-green-400 to-blue-500 opacity-20 rounded-full blur-3xl"></div>
                         <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-blue-500 to-green-500 opacity-20 rounded-full blur-3xl"></div>
-                        <h2 className="text-2xl font-bold relative">Withdraw</h2>
+                        <h2 className="text-2xl font-bold relative">Deposit</h2>
                         <p className="text-gray-400 mt-2 relative">Minimum $1</p>
                     </Card>
                 </DrawerTrigger>
                 <DrawerContent>
                     <div className="mx-auto w-full max-w-sm text-center">
                         <DrawerHeader>
-                            <DrawerTitle>Withdraw Funds</DrawerTitle>
-                            <DrawerDescription>Set the amount you want to withdraw.</DrawerDescription>
+                            <DrawerTitle>Deposit Funds</DrawerTitle>
+                            <DrawerDescription>Set the amount you want to deposit.</DrawerDescription>
                         </DrawerHeader>
                         <div className="p-4 pb-0 flex flex-col items-center">
                             <div className="flex items-center space-x-4">
@@ -83,7 +113,7 @@ export function WithdrawDrawer() {
                             </div>
                         </div>
                         <DrawerFooter className="flex flex-col gap-2 mt-6">
-                            <Button className="w-full" onClick={handleConfirmWithdraw}>Withdraw</Button>
+                            <Button className="w-full" onClick={handleConfirmDeposit}>Deposit</Button>
                             <DrawerClose asChild>
                                 <Button variant="outline" className="w-full">Cancel</Button>
                             </DrawerClose>
@@ -96,9 +126,9 @@ export function WithdrawDrawer() {
             <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Confirm Withdrawal</DialogTitle>
+                        <DialogTitle>Confirm Deposit</DialogTitle>
                         <DialogDescription>
-                            Please review the details before confirming your withdrawal.
+                            Please review the details before confirming your deposit.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -106,7 +136,7 @@ export function WithdrawDrawer() {
                             <div className="text-sm font-medium text-gray-500">Current Balance</div>
                             <div className="text-sm font-semibold">$500.00</div>
 
-                            <div className="text-sm font-medium text-gray-500">Withdraw Amount</div>
+                            <div className="text-sm font-medium text-gray-500">Deposit Amount</div>
                             <div className="text-sm font-semibold">${amount}</div>
 
                             <div className="text-sm font-medium text-gray-500">Fee (2%)</div>
@@ -118,14 +148,14 @@ export function WithdrawDrawer() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsConfirmDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleWithdraw} disabled={loading}>
+                        <Button onClick={handleDeposit} disabled={loading}>
                             {loading ? (
                                 <div role="status" className="flex items-center gap-2">
-                                    <LoadingIcon /> 
+                                    <LoadingIcon />
                                     <span>Processing...</span>
                                 </div>
                             ) : (
-                                "Confirm Withdrawal"
+                                "Confirm Deposit"
                             )}
                         </Button>
                     </DialogFooter>
@@ -138,10 +168,10 @@ export function WithdrawDrawer() {
                     <DialogHeader>
                         <DialogTitle className="flex items-center justify-center gap-2">
                             <CheckCircle className="h-6 w-6 text-green-500" />
-                            Withdrawal Successful
+                            Deposit Successful
                         </DialogTitle>
                         <DialogDescription>
-                            Your withdrawal of <strong>${amount}</strong> has been successfully processed.
+                            Your deposit of <strong>${amount}</strong> has been successfully added to your wallet.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

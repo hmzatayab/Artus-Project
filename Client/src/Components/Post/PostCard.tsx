@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { CalendarIcon } from "lucide-react";
 import { RiVerifiedBadgeFill, RiChat1Line, RiGroupLine, } from "@remixicon/react";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import LikeButton from "@/components/LikeButton";
-import { getUser } from "@/utils/storage";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
+import LikeButton from "@/components/Post/LikeButton";
+import { getUser } from "@/utils/Storage";
 import { PostCardProps } from "@/Types/Post";
 
 const PostCard = forwardRef<HTMLDivElement, PostCardProps>(({ post }, ref) => {

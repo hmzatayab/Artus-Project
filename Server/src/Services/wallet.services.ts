@@ -1,5 +1,6 @@
 import prisma from "../config/DB";
 import { generateInvoiceId, generateTransactionId } from "../utils/generateId";
+import { AppError } from "../Types/Error";
 
 export const depositFunds = async (userId: string, amount: number) => {
   const user = await prisma.user.findUnique({
@@ -50,6 +51,7 @@ export const depositFunds = async (userId: string, amount: number) => {
             type: "deposit",
             amount,
             status: "success",
+            fromUserId: user.id,
             transactionId: generateTransactionId(),
             invoiceId: generateInvoiceId(),
           },
@@ -74,6 +76,7 @@ export const depositFunds = async (userId: string, amount: number) => {
         type: "deposit",
         amount,
         status: "failed",
+        fromUserId: user.id,
         transactionId: generateTransactionId(),
         invoiceId: generateInvoiceId(),
       },
@@ -148,6 +151,7 @@ export const withdrawFunds = async (userId: string, amount: number) => {
         type: "withdraw",
         amount,
         status: "failed",
+        fromUserId: user.id,
         transactionId: generateTransactionId(),
         invoiceId: generateInvoiceId(),
       },
@@ -186,6 +190,7 @@ export const withdrawFunds = async (userId: string, amount: number) => {
             type: "withdraw",
             amount,
             status: "success",
+            fromUserId: user.id,
             transactionId: generateTransactionId(),
             invoiceId: generateInvoiceId(),
           },
@@ -210,6 +215,7 @@ export const withdrawFunds = async (userId: string, amount: number) => {
         type: "withdraw",
         amount,
         status: "failed",
+        fromUserId: user.id,
         transactionId: generateTransactionId(),
         invoiceId: generateInvoiceId(),
       },
@@ -319,6 +325,8 @@ export const transferFunds = async (
         type: "transfer",
         amount,
         status: "failed",
+        toUserId: receiverId,
+        fromUserId: senderId,
         transactionId: generateTransactionId(),
         invoiceId: generateInvoiceId(),
       },
@@ -376,6 +384,7 @@ export const transferFunds = async (
             type: "transfer",
             amount,
             toUserId: receiverId,
+            fromUserId: senderId,
             status: "success",
             transactionId: generateTransactionId(),
             invoiceId: generateInvoiceId(),
@@ -392,6 +401,7 @@ export const transferFunds = async (
             type: "transfer",
             amount,
             fromUserId: senderId,
+            toUserId: receiverId,
             status: "success",
             transactionId: generateTransactionId(),
             invoiceId: generateInvoiceId(),
@@ -406,7 +416,7 @@ export const transferFunds = async (
       receiverId: senderId,
       senderId: senderId,
       type: "successful_transfer",
-      message: `You have successfully transferred ${amount} to ${receiverId}.`,
+      message: `You have successfully transferred ${amount} to ${receiver.name}.`,
       link: `/wallet/${senderWallet.id}`,
       isRead: false,
     },
@@ -417,7 +427,7 @@ export const transferFunds = async (
       receiverId: receiverId,
       senderId: senderId,
       type: "received_transfer",
-      message: `You have received ${amount} from ${senderId}.`,
+      message: `You have received ${amount} from ${sender.name}.`,
       link: `/wallet/${receiverWallet.id}`,
       isRead: false,
     },
@@ -434,14 +444,27 @@ export const getWalletBalance = async (userId: string) => {
   return wallet.balance;
 };
 
-export const getWalletTransactions = async (userId: string) => {
-  const wallet = await prisma.wallet.findUnique({
-    where: { userId },
-    include: { transactions: true },
-  });
+export const getWalletTransactions = async (walletId: string) => {
+  try {
+    if (!walletId) {
+      throw new Error("Wallet ID is required");
+    }
 
-  if (!wallet) throw new Error("Wallet not found");
-  return wallet.transactions;
+    const transactions = await prisma.transaction.findMany({
+      where: { walletId },
+      include: {
+        fromUser: { select: { id: true, name: true, image: true } },
+        toUser: { select: { id: true, name: true, image: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return { success: true, data: transactions };
+  } catch (error) {
+    const err = error as AppError;
+    console.error("🔥 Error fetching transactions:", error);
+    return { success: false, error: err.message || "Internal Server Error" };
+  }
 };
 
 export const getTransactionInvoice = async (transactionId: string) => {

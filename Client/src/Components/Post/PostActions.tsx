@@ -10,7 +10,7 @@ import { Post } from "@/Types/Post";
 import { updatePost } from "@/APIs/Post";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { getUser } from "@/utils/storage";
+import { getUser } from "@/utils/Storage";
 import LoadingIcon from "@/utils/Loading";
 
 interface PostActionsProps {

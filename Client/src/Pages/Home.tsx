@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { toast } from "sonner";
 import { getAllPosts } from "@/APIs/Post";
-import PostCard from "@/components/PostCard";
-import { PostCards } from "@/components/Skeleton/PostCards";
+import PostCard from "@/components/Post/PostCard";
+import { PostCards } from "@/components/Other/Skeleton/PostCards";
 import { Post } from "@/Types/Post";
-import Hero from "@/components/Hero";
+import Hero from "@/components/Home/Hero";
 
 function Home() {
     const [posts, setPosts] = useState<Post[]>([]);

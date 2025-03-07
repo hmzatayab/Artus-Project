@@ -1,14 +1,12 @@
-"use client";
-
 import * as React from "react";
 import { Minus, Plus, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
-import { Card } from "../ui/card";
+import { Card } from "../../ui/card";
 import { transferAmount } from "@/APIs/Wallet";
-import { getUser } from "@/utils/storage";
+import { getUser } from "@/utils/Storage";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "../../ui/dialog";
 import LoadingIcon from "@/utils/Loading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getUSers } from "@/APIs/User";
@@ -18,13 +16,14 @@ export function TransferDrawer() {
     const [amount, setAmount] = React.useState(50);
     const [recipient, setRecipient] = React.useState("");
     const [recipientUser, setRecipientUser] = React.useState<User | null>(null);
-    const [userList, setUserList] = React.useState<User[]>([]); 
-    const [isSearchDialogOpen, setIsSearchDialogOpen] = React.useState(false); 
-    const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false); 
+    const [userList, setUserList] = React.useState<User[]>([]);
+    const [isSearchDialogOpen, setIsSearchDialogOpen] = React.useState(false);
+    const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
     const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
 
     const data = getUser();
+    const user = data.user
     const token = data.token;
 
     React.useEffect(() => {
@@ -55,11 +54,52 @@ export function TransferDrawer() {
     }
 
     const handleTransfer = async () => {
+        if (!user) {
+            toast.error("User not found");
+            return;
+        }
+
+        if (!user.isEmailVerified) {
+            toast.error("Email not verified. Please verify your email first.");
+            return;
+        }
+
         if (!recipientUser) {
             toast.error("Please select a valid recipient.");
             return;
         }
-        setLoading(true); 
+
+        if (!recipientUser.isEmailVerified) {
+            toast.error("Receiver email not verified.");
+            return;
+        }
+
+        if (!user.wallet?.isActive) {
+            toast.error("Transaction failed because your wallet is not active.");
+            return;
+        }
+
+        if (user.isBlocked) {
+            toast.error("Your account is blocked. Please contact support.");
+            return;
+        }
+
+        if (recipientUser.isBlocked) {
+            toast.error("Receiver account is blocked.");
+            return;
+        }
+
+        if (user.id === recipientUser.id) {
+            toast.error("Cannot transfer funds to yourself.");
+            return;
+        }
+
+        if (!user.wallet || !recipientUser.wallet) {
+            toast.error("Wallet not found.");
+            return;
+        }
+
+        setLoading(true);
         try {
             await transferAmount(amount, recipientUser.id, token);
             setIsConfirmDialogOpen(false);
@@ -68,7 +108,7 @@ export function TransferDrawer() {
         } catch (err) {
             toast.error(`Failed to transfer ${err || "Something went wrong!"}`);
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
@@ -77,14 +117,14 @@ export function TransferDrawer() {
             toast.error("Please select a valid recipient.");
             return;
         }
-        setIsConfirmDialogOpen(true); 
+        setIsConfirmDialogOpen(true);
     };
 
     return (
         <>
             <Drawer>
                 <DrawerTrigger asChild>
-                    <Card className="relative p-6 rounded-xl shadow-lg border border-gray-700 hover:shadow-2xl hover:scale-105 transition transform h-36">
+                    <Card className="cursor-pointer relative p-6 rounded-xl shadow-lg border border-gray-700 hover:shadow-2xl hover:scale-105 transition transform h-36">
                         <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-blue-500 to-purple-500 opacity-20 rounded-full blur-3xl"></div>
                         <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-purple-500 to-blue-500 opacity-20 rounded-full blur-3xl"></div>
                         <h2 className="text-2xl font-bold relative">Transfer Funds</h2>
@@ -124,7 +164,7 @@ export function TransferDrawer() {
                         <DrawerFooter className="flex flex-col gap-2 mt-6">
                             <Button
                                 className="w-full"
-                                onClick={() => setIsSearchDialogOpen(true)} 
+                                onClick={() => setIsSearchDialogOpen(true)}
                             >
                                 Select Recipient
                             </Button>
@@ -151,7 +191,7 @@ export function TransferDrawer() {
                             value={recipient}
                             onChange={(e) => {
                                 setRecipient(e.target.value);
-                                handleRecipientSearch(e.target.value); 
+                                handleRecipientSearch(e.target.value);
                             }}
                             placeholder="Enter recipient's username"
                             className="w-full px-4 py-2 border-2 outline-1 rounded-lg focus:ring-4 focus:ring-indigo-500 outline-none placeholder-gray-400 transition-all duration-300"
@@ -176,9 +216,9 @@ export function TransferDrawer() {
                             className="w-full"
                             onClick={() => {
                                 setIsSearchDialogOpen(false);
-                                handleConfirmTransfer(); 
+                                handleConfirmTransfer();
                             }}
-                            disabled={!recipientUser} 
+                            disabled={!recipientUser}
                         >
                             Next
                         </Button>

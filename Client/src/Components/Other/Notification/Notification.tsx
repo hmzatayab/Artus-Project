@@ -3,8 +3,8 @@ import { Bell } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, } from "@/components/ui/dropdown-menu"; // Adjust the import path
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { Button } from "./ui/button";
 import { NotificationDropdownProps } from "@/Types/Notification";
+import { Button } from "@/components/ui/button";
 
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notifications }) => {
     return (

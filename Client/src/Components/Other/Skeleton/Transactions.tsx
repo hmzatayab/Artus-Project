@@ -3,16 +3,8 @@ import { Card } from "@/components/ui/card";
 
 export function TransactionHistorySkeleton() {
   return (
-    <Card className="relative p-6 rounded-xl shadow-lg outline dark:bg-[#050c1c]">
-      {/* Glowing Effect */}
-      <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-r from-blue-500 to-purple-500 opacity-20 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-purple-500 to-pink-500 opacity-20 rounded-full blur-3xl"></div>
 
-      {/* Transaction History Content */}
-      <h3 className="text-xl font-bold">
-        <Skeleton className="w-48 h-6" />
-      </h3>
-      <div className="space-y-2 overflow-y-auto max-h-[300px] pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800 mt-4">
+      <div className="space-y-2 overflow-y-auto max-h-[360px] pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800 mt-4">
         {[1, 2, 3, 4, 5].map((_, index) => (
           <Card
             key={index}
@@ -44,6 +36,5 @@ export function TransactionHistorySkeleton() {
           </Card>
         ))}
       </div>
-    </Card>
   );
 }

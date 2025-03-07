@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Card } from "./ui/card";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Card } from "../ui/card";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
 import { uploadImage } from "@/APIs/User";
-import { Checkbox } from "./ui/checkbox";
+import { Checkbox } from "../ui/checkbox";
 import LoadingIcon from "@/utils/Loading";
 
 const UploadDrawer: React.FC = () => {

@@ -65,6 +65,8 @@ model User {
   receivedNotifications Notification[] @relation(name: "ReceiverNotifications")
   sentNotifications     Notification[] @relation(name: "SenderNotifications")
   Bid                   Bid[]
+  transactionsFrom Transaction[] @relation(name: "FromUserRelation")
+  transactionsTo   Transaction[] @relation(name: "ToUserRelation")
 }
 
 model Admin {
@@ -158,17 +160,20 @@ model Wallet {
 model Transaction {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   walletId      String   @db.ObjectId
-  type          String // 'deposit', 'withdraw', 'transfer'
+  type          String   // 'deposit', 'withdraw', 'transfer'
   amount        Float
   transactionId String   @unique 
   invoiceId     String   @unique 
   fromUserId    String?  @db.ObjectId
   toUserId      String?  @db.ObjectId
-  status        String // 'success', 'failed', 'pending'
+  status        String   // 'success', 'failed', 'pending'
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  wallet   Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  fromUser User? @relation(name: "FromUserRelation", fields: [fromUserId], references: [id], onDelete: SetNull)
+  toUser   User? @relation(name: "ToUserRelation", fields: [toUserId], references: [id], onDelete: SetNull)
 }
 
 model Notification {

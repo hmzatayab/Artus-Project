@@ -84,16 +84,25 @@ export const getWalletBalance = async (req: Request, res: Response) => {
 };
 
 export const getWalletTransactions = async (req: Request, res: Response) => {
-  const userId = (req as any).user?.userId;
-
-  if (!userId)
-    res.status(401).json({ success: false, message: "Unauthorized" });
-
   try {
-    const transactions = await walletService.getWalletTransactions(userId);
-    res.status(200).json({ success: true, transactions });
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+    const { walletId } = req.params;
+
+    if (!walletId) {
+       res.status(400).json({ success: false, error: "Wallet ID is required" });
+       return
+    }
+
+    const result = await walletService.getWalletTransactions(walletId);
+
+    if (!result.success) {
+       res.status(500).json(result);
+       return
+    }
+
+     res.status(200).json(result);
+  } catch (error) {
+    console.error("🔥 Controller Error:", error);
+     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 

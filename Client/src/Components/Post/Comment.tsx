@@ -10,10 +10,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SendHorizonal, ChevronDown, ChevronUp } from "lucide-react";
 import { RiHeartFill, RiHeartLine, RiVerifiedBadgeFill } from "@remixicon/react";
 import { getPostComments, createComment, createReply, likeComment, likeCommentReply } from "@/APIs/Post";
-import { getUser } from "@/utils/storage";
+import { getUser } from "@/utils/Storage";
 import { Comment, ReplyType, CommentCardProps } from "@/Types/Comment";
 import { useNavigate } from "react-router-dom";
-import { CommentSkeleton } from "./Skeleton/Comment";
+import { CommentSkeleton } from "../Other/Skeleton/Comment";
 
 const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
     const [comments, setComments] = useState<Comment[]>([]);
@@ -46,8 +46,21 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
     const handleCommentSubmit = async () => {
         if (!comment.trim() || !postId) return;
 
+        // Validation: Comment max 200 characters hona chahiye
+    if (comment.length > 200) {
+        toast("Comment cannot exceed 200 characters.");
+        return;
+    }
+
+    // Validation: Sirf '@' allowed, baki special characters block
+    const specialCharRegex = /[^a-zA-Z0-9\s@\p{Emoji}]/u;
+    if (specialCharRegex.test(comment)) {
+        toast("Only '@' is allowed in comments. No other special characters.");
+        return;
+    }
+
         try {
-            const token = data?.token; // Get user token
+            const token = data?.token; 
             if (!token) {
                 toast("You need to login first", {
                     action: {
@@ -60,19 +73,17 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
 
             const newComment = await createComment(postId, comment, token);
 
-            // Ensure newComment has the correct structure
             const updatedComment: Comment = {
-                ...(newComment.comment as Comment), // Spread newComment object
+                ...(newComment.comment as Comment),
                 user: {
-                    name: data.user.name, // Add user name from current user data
-                    image: data.user.image, // Add user image from current user data
+                    name: data.user.name, 
+                    image: data.user.image,
                 },
             };
 
-            // Update comments state
             setComments((prevComments) => [...prevComments, updatedComment]);
-            setComment(""); // Clear input after submission
-            setReplyingTo(null); // Clear replyingTo state
+            setComment("");
+            setReplyingTo(null);
         } catch (error) {
             console.error("Failed to create comment");
         } finally {
@@ -425,9 +436,9 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
                 <Card className="px-1 py-3 lg:p-3 dark:bg-[#050c1c] bg-white">
                     <CardContent className="flex items-center gap-3">
                         <Avatar className="hidden lg:block">
-                            <AvatarImage src={data.user.image} alt="User" />
+                            <AvatarImage src={data?.user.image} alt="User" />
                             <AvatarFallback>
-                                {data.user.name
+                                {data?.user.name
                                     .split(" ")
                                     .map((word: string) => word[0]) 
                                     .join("")
