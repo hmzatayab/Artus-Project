@@ -3,15 +3,9 @@
 import * as React from "react";
 import { Minus, Plus, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
-import { Card } from "../../ui/card";
-import { withdrawAmount } from "@/APIs/Wallet";
-=======
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/Components/ui/drawer";
 import { Card } from "../../ui/card";
 import { getWallet, withdrawAmount } from "@/APIs/Wallet";
->>>>>>> 852cb28 (Implement Redis caching in post routes)
 import { getUser } from "@/utils/Storage";
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "../../ui/dialog";
@@ -62,11 +56,7 @@ export function WithdrawDrawer() {
             return;
         }
 
-<<<<<<< HEAD
-        if (!user.wallet?.isActive) {
-=======
         if (!wallet?.wallet.isActive) {
->>>>>>> 852cb28 (Implement Redis caching in post routes)
             toast.error("Transaction failed because your wallet is not active.");
             setLoading(false);
             return;
@@ -78,11 +68,7 @@ export function WithdrawDrawer() {
             return;
         }
 
-<<<<<<< HEAD
-        if (!user.wallet) {
-=======
         if (!wallet.wallet) {
->>>>>>> 852cb28 (Implement Redis caching in post routes)
             toast.error("Wallet not found.");
             setLoading(false);
             return;

@@ -57,11 +57,7 @@ function UserUpdateDialog() {
             return;
         }
 
-<<<<<<< HEAD
-        if (bio.length < 100 || bio.length > 180) {
-=======
         if ( bio.length > 180) {
->>>>>>> 852cb28 (Implement Redis caching in post routes)
             toast("Bio must be between 100 to 180 characters.");
             setLoading(false);
             return;
