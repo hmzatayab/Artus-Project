@@ -3,23 +3,48 @@
 import * as React from "react";
 import { Minus, Plus, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+<<<<<<< HEAD
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Card } from "../../ui/card";
 import { depositAmount } from "@/APIs/Wallet";
+=======
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/Components/ui/drawer";
+import { Card } from "../../ui/card";
+import { depositAmount, getWallet } from "@/APIs/Wallet";
+>>>>>>> 852cb28 (Implement Redis caching in post routes)
 import { getUser } from "@/utils/Storage";
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "../../ui/dialog";
 import LoadingIcon from "@/utils/Loading";
+import { Wallet } from "@/Types/Wallet";
+import { AppError } from "@/Types/error";
 
 export function DepositDrawer() {
     const [amount, setAmount] = React.useState(50);
     const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
     const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);
+    const [wallet, setWallet] = React.useState<Wallet | null>(null);
     const [loading, setLoading] = React.useState(false);
 
     const data = getUser();
     const user = data.user;
     const token = data.token;
+    
+
+      React.useEffect(() => {
+        const fetchWallet = async () => {
+          try {
+            const data = await getWallet(token);
+            setWallet(data);
+          } catch (err) {
+            console.error(err);
+            const error = err as AppError;
+            console.log(error.message);
+          }
+        };
+        fetchWallet();
+      }, [])
+
 
     function onClick(adjustment: any) {
         setAmount(Math.max(10, Math.min(1000, amount + adjustment)));
@@ -39,7 +64,11 @@ export function DepositDrawer() {
             return;
         }
 
+<<<<<<< HEAD
         if (!user.wallet?.isActive) {
+=======
+        if (!wallet?.wallet.isActive) {
+>>>>>>> 852cb28 (Implement Redis caching in post routes)
             toast.error("Transaction failed because your wallet is not active.");
             setLoading(false);
             return;
@@ -51,7 +80,11 @@ export function DepositDrawer() {
             return;
         }
 
+<<<<<<< HEAD
         if (!user.wallet) {
+=======
+        if (!wallet.wallet) {
+>>>>>>> 852cb28 (Implement Redis caching in post routes)
             toast.error("Wallet not found.");
             setLoading(false);
             return;

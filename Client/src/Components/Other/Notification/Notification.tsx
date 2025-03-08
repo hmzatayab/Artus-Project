@@ -46,7 +46,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notificatio
                                                 <Link to="/profile/username">
                                                     <img
                                                         className="rounded-full w-11 h-11"
-                                                        src={notification.sender.image}
+                                                        src={notification.sender?.image}
                                                         alt="Notification"
                                                     />
                                                 </Link>

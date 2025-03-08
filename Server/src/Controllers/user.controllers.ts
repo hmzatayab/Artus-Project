@@ -1,10 +1,13 @@
 import fs from "fs";
 import path from "path";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 import { Request, Response, RequestHandler } from "express";
 import prisma from "../config/DB";
 import * as userService from "../Services/user.services";
 import { AppError } from "../Types/Error";
+import { fileURLToPath } from "url";
 
 export const userRegister = async (req: Request, res: Response) => {
   try {
@@ -209,6 +212,8 @@ export const getAllUser = async (req: Request, res: Response) => {
         image: true,
         followers: true,
         identityVerified: true,
+        isBlocked: true,
+        isEmailVerified: true,
       },
     });
 

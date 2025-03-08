@@ -1,12 +1,7 @@
+import Redis from "../config/redis";
 import prisma from "../config/DB";
 
-export const createPost = async (postData: {
-  userId: string;
-  title: string;
-  description: string;
-  tags: string[];
-  imageURL: string;
-}) => {
+export const createPost = async (postData: { userId: string; title: string; description: string; tags: string[]; imageURL: string; }) => {
   const { userId, title, description, tags, imageURL } = postData;
 
   try {
@@ -28,6 +23,12 @@ export const createPost = async (postData: {
 
 export const getAllPosts = async (page: number, limit: number = 10) => {
   const skip = (page - 1) * limit;
+  const cacheKey = `posts:page=${page}:limit=${limit}`;
+
+  const cachedData = await Redis.get(cacheKey);
+  if (cachedData) {
+    return JSON.parse(cachedData);
+  }
 
   const posts = await prisma.post.findMany({
     skip,
@@ -61,13 +62,20 @@ export const getAllPosts = async (page: number, limit: number = 10) => {
   });
 
   const totalPosts = await prisma.post.count();
-  const hasMore = page * limit < totalPosts; // Check if more posts are available
+  const hasMore = page * limit < totalPosts; 
+  const responseData = { posts, hasMore };
+  await Redis.set(cacheKey, JSON.stringify(responseData), "EX", 60);
 
   return { posts, hasMore };
 };
 
 export const getPostsByUserId = async (userId: string) => {
-  return await prisma.post.findMany({
+  const cacheKey = `userPosts:${userId}`;
+  const cachedData = await Redis.get(cacheKey);
+  if (cachedData) {
+    return JSON.parse(cachedData);
+  }
+  const posts = await prisma.post.findMany({
     where: { userId },
     include: {
       user: {
@@ -95,10 +103,16 @@ export const getPostsByUserId = async (userId: string) => {
       },
     },
   });
+  await Redis.set(cacheKey, JSON.stringify(posts), "EX", 60);
 };
 
 export const getPostById = async (postId: string) => {
-  return await prisma.post.findUnique({
+  const cacheKey = `post:${postId}`;
+  const cachedData = await Redis.get(cacheKey);
+  if (cachedData) {
+    return JSON.parse(cachedData);
+  }
+  const post = await prisma.post.findUnique({
     where: { id: postId },
     select: {
       id: true,
@@ -141,6 +155,9 @@ export const getPostById = async (postId: string) => {
       },
     },
   });
+  if (!post) return null;
+  await Redis.set(cacheKey, JSON.stringify(post), "EX", 3600);
+  return post;
 };
 
 export const likePost = async (postId: string, userId: string) => {

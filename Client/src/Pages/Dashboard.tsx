@@ -1,17 +1,25 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Link } from "react-router-dom"
 import { RiBookmarkFill, RiLayoutGridFill, RiLineChartLine, RiTrophyFill, RiVerifiedBadgeFill } from "@remixicon/react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/Components/ui/separator";
 import { useEffect, useState } from "react";
 import PostCard from "@/components/Post/PostCard";
 import { toast } from "sonner"
 import { getUserPosts } from "@/APIs/Post";
 import { getUser } from "@/utils/Storage";
+<<<<<<< HEAD
 import { PostCardSkeleton } from "@/components/Other/Skeleton/PostCard";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { AlertTriangle, CalendarIcon } from "lucide-react";
 import { ChartComponent } from "@/components/Other/Analytics/ChartForViews"
 import UserUpdateDialog from "@/components/Other/User/UserUpdateDialog";
+=======
+import { PostCardSkeleton } from "@/Components/Other/Skeleton/PostCard";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { AlertTriangle, CalendarIcon } from "lucide-react";
+import { ChartComponent } from "@/Components/Other/Analytics/ChartForViews"
+import UserUpdateDialog from "@/Components/Other/User/UserUpdateDialog";
+>>>>>>> 852cb28 (Implement Redis caching in post routes)
 import { Button } from "@/components/ui/button";
 import { getTransactions, getWallet } from "@/APIs/Wallet";
 import { TransactionsResponse, Wallet } from "@/Types/Wallet";

@@ -179,8 +179,8 @@ model Transaction {
 model Notification {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   receiverId String   @db.ObjectId
-  senderId   String   @db.ObjectId
-  type       String // message, follow, like, comment, etc.
+  senderId   String?  @db.ObjectId // 👈 Nullable senderId
+  type       String   // message, follow, like, comment, etc.
   message    String
   link       String?
   isRead     Boolean  @default(false)
@@ -188,11 +188,12 @@ model Notification {
   updatedAt  DateTime @updatedAt
 
   receiver User @relation(name: "ReceiverNotifications", fields: [receiverId], references: [id])
-  sender   User @relation(name: "SenderNotifications", fields: [senderId], references: [id])
+  sender   User? @relation(name: "SenderNotifications", fields: [senderId], references: [id]) // 👈 Nullable sender
 
   @@index([receiverId])
   @@index([senderId])
 }
+
 
 model Auction {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId

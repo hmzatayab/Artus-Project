@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+<<<<<<< HEAD
 import { ChartComponent } from "@/components/Other/Analytics/ChartForViews";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -12,6 +13,20 @@ import { TransactionHistorySkeleton } from "@/components/Other/Skeleton/Transact
 import type { Wallet, TransactionsResponse } from "@/Types/Wallet";
 import { WithdrawDrawer } from "@/components/Other/Wallet/Withdraw";
 import { TransferDrawer } from "@/components/Other/Wallet/Transfer";
+=======
+import { ChartComponent } from "@/Components/Other/Analytics/ChartForViews";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { DepositDrawer } from "@/Components/Other/Wallet/Deposit";
+import { useEffect, useState } from "react";
+import { getUser } from "@/utils/Storage";
+import { getTransactions, getWallet } from "@/APIs/Wallet";
+import { Switch } from "@/Components/ui/switch";
+import { TransactionHistorySkeleton } from "@/Components/Other/Skeleton/Transactions";
+import type { Wallet, TransactionsResponse } from "@/Types/Wallet";
+import { WithdrawDrawer } from "@/Components/Other/Wallet/Withdraw";
+import { TransferDrawer } from "@/Components/Other/Wallet/Transfer";
+>>>>>>> 852cb28 (Implement Redis caching in post routes)
 import { toast } from "sonner";
 import { AppError } from "@/Types/error"
 import { RiArrowGoBackLine } from "@remixicon/react";
@@ -27,8 +42,12 @@ function Wallet() {
     const token = getUser().token;
 
     const walletId = wallet?.wallet.id;
+<<<<<<< HEAD
     console.log(transactions);
 
+=======
+    
+>>>>>>> 852cb28 (Implement Redis caching in post routes)
     useEffect(() => {
         const fetchWallet = async () => {
             try {
