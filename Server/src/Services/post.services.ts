@@ -72,9 +72,12 @@ export const getAllPosts = async (page: number, limit: number = 10) => {
 export const getPostsByUserId = async (userId: string) => {
   const cacheKey = `userPosts:${userId}`;
   const cachedData = await Redis.get(cacheKey);
+
   if (cachedData) {
+    console.log("Cache hit! Returning cached data.");
     return JSON.parse(cachedData);
   }
+
   const posts = await prisma.post.findMany({
     where: { userId },
     include: {
@@ -103,7 +106,9 @@ export const getPostsByUserId = async (userId: string) => {
       },
     },
   });
+
   await Redis.set(cacheKey, JSON.stringify(posts), "EX", 60);
+  return posts;
 };
 
 export const getPostById = async (postId: string) => {

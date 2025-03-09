@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { RiBookmarkFill, RiLayoutGridFill, RiLineChartLine, RiTrophyFill, RiVerifiedBadgeFill } from "@remixicon/react";
 import { Separator } from "@/Components/ui/separator";
 import { useEffect, useState } from "react";
-import PostCard from "@/components/Post/PostCard";
+import PostCard from "@/Components/Post/PostCard";
 import { toast } from "sonner"
 import { getUserPosts } from "@/APIs/Post";
 import { getUser } from "@/utils/Storage";
@@ -23,7 +23,6 @@ const menuOptions = [
   { name: "Wishlist", icon: <RiBookmarkFill size={20} /> },
   { name: "Analytics", icon: <RiLineChartLine size={20} /> },
 ];
-
 
 function Profile() {
   const [selectedTab, setSelectedTab] = useState("All Posts");
@@ -50,9 +49,8 @@ function Profile() {
         setLoading(false);
       }
     };
-
     fetchPosts();
-  }, []);
+  }, [userId]);
 
   const handleSendVerificationLink = () => {
     toast.success("Verification link sent to your email!");
@@ -70,7 +68,7 @@ function Profile() {
       }
     };
     fetchWallet();
-  }, [])
+  }, [walletId])
 
   useEffect(() => {
     const fetchTransactions = async () => {

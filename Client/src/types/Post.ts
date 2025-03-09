@@ -7,6 +7,8 @@ export type Post = {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  auctionId?: string;
+  isAuctioned: boolean;
   user: {
     id: string;
     name: string;

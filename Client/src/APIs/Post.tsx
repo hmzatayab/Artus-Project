@@ -68,7 +68,6 @@ export const likePost = async (postId: string, token: string): Promise<LikeRespo
     }
 };
 
-
 export const updatePost = async (postId: string, updateData: object, token: string) => {
     try {
         const response = await axios.put(
@@ -87,8 +86,6 @@ export const updatePost = async (postId: string, updateData: object, token: stri
         throw error;
     }
 };
-
-
 
 export const getPost = async (postId: string): Promise<Post> => {
     try {

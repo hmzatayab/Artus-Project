@@ -1,17 +1,15 @@
-"use client";
-
 import * as React from "react";
 import { Minus, Plus, CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/Components/ui/drawer";
 import { Card } from "../../ui/card";
 import { depositAmount, getWallet } from "@/APIs/Wallet";
 import { getUser } from "@/utils/Storage";
 import { toast } from "sonner"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "../../ui/dialog";
 import LoadingIcon from "@/utils/Loading";
 import { Wallet } from "@/Types/Wallet";
 import { AppError } from "@/Types/error";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export function DepositDrawer() {
     const [amount, setAmount] = React.useState(50);

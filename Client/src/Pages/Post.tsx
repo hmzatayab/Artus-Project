@@ -6,19 +6,20 @@ import { formatDistanceToNow } from "date-fns";
 import { getUser } from "@/utils/Storage";
 import { toast } from "sonner";
 import { Post } from "@/Types/Post";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/Components/ui/avatar";
+import { Badge } from "@/Components/ui/badge";
+import { Button } from "@/Components/ui/button";
 import { RiBookmarkLine, RiChat1Line, RiGroupLine, RiUserStarLine, RiVerifiedBadgeFill } from "@remixicon/react";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import LikeButton from "@/components/Post/LikeButton";
-import PostCard from "@/components/Post/PostCard";
-import CommentCard from "@/components/Post/Comment";
-import { PostSkeleton } from "@/components/Other/Skeleton/Post";
-import { PostCardSkeleton } from "@/components/Other/Skeleton/PostCard";
-import { PostActions } from "@/components/Post/PostActions";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/Components/ui/hover-card";
+import LikeButton from "@/Components/Post/LikeButton";
+import PostCard from "@/Components/Post/PostCard";
+import CommentCard from "@/Components/Post/Comment";
+import { PostSkeleton } from "@/Components/Other/Skeleton/Post";
+import { PostCardSkeleton } from "@/Components/Other/Skeleton/PostCard";
+import { PostActions } from "@/Components/Post/PostActions";
 import LoadingIcon from "@/utils/Loading";
 import { followUnfollowUser } from "@/APIs/User";
+import AuctionBar from "@/Components/Other/Auction/AuctionBar";
 
 export default function PostPage() {
     const { postId } = useParams();
@@ -27,10 +28,13 @@ export default function PostPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState("comments");
+   
+    
 
     const data = getUser() || {};
     const token = data?.token;
     const loggedInUserId = data?.user?.id;
+    
 
     const [isFollowing, setIsFollowing] = useState(false);
     const [followersCount, setFollowersCount] = useState(0);
@@ -90,6 +94,7 @@ export default function PostPage() {
         };
         fetchPosts();
     }, []);
+    
 
     const handlePostUpdate = (updatedPost: Post) => {
         setPost(updatedPost);
@@ -254,6 +259,7 @@ export default function PostPage() {
                     </div>
                 </div>
             )}
+            <div>{post?.isAuctioned && <AuctionBar post={post} token={token} />}</div>
             <div>
                 <div className="mt-10">
                     <div className="relative mb-8 flex flex-col items-center text-center">

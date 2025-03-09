@@ -1,21 +1,21 @@
-import { Card } from "@/components/ui/card";
+import { Card } from "@/Components/ui/card";
 import { forwardRef } from "react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/Components/ui/avatar";
+import { Button } from "@/Components/ui/button";
 import { Link } from "react-router-dom";
 import { CalendarIcon } from "lucide-react";
 import { RiVerifiedBadgeFill, RiChat1Line, RiGroupLine, } from "@remixicon/react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
-import LikeButton from "@/components/Post/LikeButton";
+import LikeButton from "@/Components/Post/LikeButton";
 import { getUser } from "@/utils/Storage";
 import { PostCardProps } from "@/Types/Post";
 
 const PostCard = forwardRef<HTMLDivElement, PostCardProps>(({ post }, ref) => {
-
     const data = getUser();
 
     return (
-        <Card ref={ref} className="shadow-lg dark:shadow-gray-800/50 shadow-gray-500/50 dark:bg-gray-950 bg-gray-200 rounded-lg overflow-hidden h-fit p-4 transition duration-500"> {/**  bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 animate-pulse */}
+        <Card ref={ref} className={`shadow-lg rounded-lg overflow-hidden h-fit p-4 transition duration-500 ${post.isAuctioned ? "bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700" : "bg-gray-200 dark:bg-gray-950"
+            }`}>
             {/* Post Image */}
             <div className="relative w-full pb-[140%] overflow-hidden rounded-lg cursor-pointer">
                 <Link to={`/post/${post.id}`}>

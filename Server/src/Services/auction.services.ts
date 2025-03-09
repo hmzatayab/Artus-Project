@@ -1,3 +1,4 @@
+import Redis from "../config/redis";
 import prisma from "../config/DB";
 import { generateInvoiceId, generateTransactionId } from "../utils/generateId";
 
@@ -6,6 +7,7 @@ export const createAuction = async (
   startingPrice: number,
   sellerId: string
 ) => {
+  await Redis.del(`post:${postId}`);
   const existingPost = await prisma.post.findUnique({
     where: { id: postId },
     include: { user: true },
@@ -85,7 +87,7 @@ export const createAuction = async (
       isRead: false,
     },
   });
-  setTimeout(() => completeAuction(newAuction.id), 2 * 60 * 1000);
+  setTimeout(() => completeAuction(newAuction.id), 4 * 60 * 1000);
   return newAuction;
 };
 
@@ -130,8 +132,12 @@ export const completeAuction = async (auctionId: string) => {
     if (winnerId) {
       await prisma.post.update({
         where: { id: auction.postId },
-        data: { OwnerId: winnerId },
+        data: { 
+          OwnerId: winnerId, 
+          isAuctioned: false 
+        },
       });
+      
 
       await prisma.wallet.update({
         where: { userId: admin?.id }, // Replace with actual admin wallet ID
@@ -275,7 +281,8 @@ export const placeBid = async (
 
     return { success: true, message: "Bid placed successfully" };
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    throw new Error(error instanceof Error ? error.message : "Failed to place bid");
   }
 };
 
