@@ -1,5 +1,9 @@
 import * as React from "react";
+<<<<<<< HEAD
 import { CheckCircle, CalendarIcon } from "lucide-react";
+=======
+import { Minus, Plus, CheckCircle, CalendarIcon } from "lucide-react";
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
 import { Button } from "@/Components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/Components/ui/drawer";
 import { toast } from "sonner";
@@ -7,7 +11,11 @@ import LoadingIcon from "@/utils/Loading";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { placeBid } from "@/APIs/Auction"; // Assuming you have an API to place bids
 import { AuctionResponse } from "@/Types/Auction";
+<<<<<<< HEAD
 import { Link, useNavigate } from "react-router-dom";
+=======
+import { Link } from "react-router-dom";
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
 import { RiQuestionFill } from "@remixicon/react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/Components/ui/hover-card";
 
@@ -22,7 +30,10 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
     const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
 
+<<<<<<< HEAD
     const Navigate = useNavigate();
+=======
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
     const minBidAmount = auction.highestBid ? auction.highestBid + 1 : auction.startingPrice;
 
     function onClick(adjustment: number) {
@@ -49,6 +60,7 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
             toast.error(`Bid amount must be at least $${minBidAmount}`);
             return;
         }
+<<<<<<< HEAD
         if (!token) {
             toast("You need to login first", {
                 action: {
@@ -58,6 +70,8 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
             });
             return;
         }
+=======
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
         setIsConfirmDialogOpen(true);
     };
 
@@ -65,6 +79,7 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
         <>
             <Drawer>
                 <DrawerTrigger asChild>
+<<<<<<< HEAD
                     {auction.status === "active" ? (
                         <Button
                             variant={"outline"}
@@ -77,6 +92,11 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
                             Auction Ended
                         </div>
                     )}
+=======
+                    <Button variant={"outline"} className="px-7 py-6 cursor-pointer bg-black transition-transform transform hover:scale-105">
+                        Place Bid
+                    </Button>
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
                 </DrawerTrigger>
                 <DrawerContent>
                     <div className="mx-auto w-full max-w-sm text-center">
@@ -90,6 +110,7 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
                                     variant="outline"
                                     size="icon"
                                     className="h-10 w-10 rounded-full"
+<<<<<<< HEAD
                                     onClick={() => onClick(-10)}
                                     disabled={amount <= minBidAmount}
                                 >
@@ -105,6 +126,12 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
                                 >
                                     {/* <Minus /> */}
                                     <span>-1</span>
+=======
+                                    onClick={() => onClick(-1)}
+                                    disabled={amount <= minBidAmount}
+                                >
+                                    <Minus />
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
                                 </Button>
                                 <div className="text-6xl font-bold tracking-tighter">${amount}</div>
                                 <Button
@@ -113,6 +140,7 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
                                     className="h-10 w-10 rounded-full"
                                     onClick={() => onClick(1)}
                                 >
+<<<<<<< HEAD
                                     {/* <Plus /> */}
                                     <span>+1</span>
                                 </Button>
@@ -124,6 +152,9 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
                                 >
                                     {/* <Plus /> */}
                                     <span>+10</span>
+=======
+                                    <Plus />
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
                                 </Button>
                             </div>
                             <p className="text-sm text-gray-500 mt-2">

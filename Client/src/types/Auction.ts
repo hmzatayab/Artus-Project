@@ -17,24 +17,33 @@ export interface AuctionResponse {
       id: string;
       name: string;
       email: string;
+<<<<<<< HEAD
       isidentityVerified: boolean;
       username: string;
+=======
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
     };
     highestBidder: null | {
       id: string;
       name: string;
       email: string;
       image: string;
+<<<<<<< HEAD
       isidentityVerified: boolean;
       username: string;
+=======
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
     };
     winner: null | {
       id: string;
       name: string;
       email: string;
       image: string;
+<<<<<<< HEAD
       isidentityVerified: boolean;
       username: string;
+=======
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
     };
     bids: Array<{
       id: string;
@@ -44,8 +53,11 @@ export interface AuctionResponse {
         id: string;
         name: string;
         image: string;
+<<<<<<< HEAD
         isidentityVerified: boolean;
         username: string;
+=======
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
       };
     }>;
     post: {

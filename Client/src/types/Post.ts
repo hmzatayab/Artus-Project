@@ -9,8 +9,11 @@ export type Post = {
   updatedAt: string;
   auctionId?: string;
   isAuctioned: boolean;
+<<<<<<< HEAD
   eligibleForAuction: boolean;
   Owner: string;
+=======
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
   user: {
     id: string;
     name: string;

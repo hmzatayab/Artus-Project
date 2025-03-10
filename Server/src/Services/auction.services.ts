@@ -1,5 +1,8 @@
 import Redis from "../config/redis";
+<<<<<<< HEAD
 import cron from "node-cron";
+=======
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
 import prisma from "../config/DB";
 import { generateInvoiceId, generateTransactionId } from "../utils/generateId";
 import { AppError } from "../Types/Error";
@@ -70,12 +73,20 @@ export const createAuction = async (
   sellerId: string,
   auctionDays: number
 ) => {
+<<<<<<< HEAD
   try {
     await Redis.del(`post:${postId}`);
     const existingPost = await prisma.post.findUnique({
       where: { id: postId },
       include: { user: true },
     });
+=======
+  await Redis.del(`post:${postId}`);
+  const existingPost = await prisma.post.findUnique({
+    where: { id: postId },
+    include: { user: true },
+  });
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
 
     if (!existingPost || existingPost.userId !== sellerId) {
       throw new Error("You can only create an auction for your own post");
@@ -156,6 +167,82 @@ export const createAuction = async (
     const err = error as AppError;
     throw new Error(`Failed to create auction: ${err.message}`);
   }
+<<<<<<< HEAD
+=======
+
+  const commentsCount = await prisma.comment.count({ where: { postId } });
+
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    select: { likes: true },
+  });
+  const likesCount = post?.likes.length || 0;
+
+  if (likesCount < 0 || commentsCount < 0) {
+    throw new Error(
+      "You need at least 5 likes and 1 comment to start an auction"
+    );
+  }
+
+  const wallet = await prisma.wallet.findUnique({
+    where: { userId: sellerId },
+  });
+
+  if (!wallet || !wallet.isActive) {
+    throw new Error("Wallet is inactive. Cannot start auction.");
+  }
+
+  if (wallet.balance < startingPrice) {
+    throw new Error("Insufficient balance to start auction.");
+  }
+
+  const updatedWallet = await prisma.wallet.update({
+    where: { userId: sellerId },
+    data: { balance: { decrement: startingPrice } },
+  });
+
+  await prisma.transaction.create({
+    data: {
+      walletId: updatedWallet.id,
+      amount: startingPrice,
+      type: "First Bid",
+      status: "completed",
+      transactionId: generateTransactionId(),
+      invoiceId: generateInvoiceId(),
+    },
+  });
+
+  const endTime = new Date();
+  endTime.setHours(endTime.getHours() + 2);
+
+  const newAuction = await prisma.auction.create({
+    data: {
+      postId,
+      sellerId,
+      startingPrice,
+      status: "active",
+      endTime,
+    },
+  });
+
+  await prisma.post.update({
+    where: { id: postId },
+    data: { isAuctioned: true, auctionId: newAuction.id, OwnerId: null },
+  });
+
+  await prisma.notification.create({
+    data: {
+      receiverId: sellerId,
+      senderId: sellerId,
+      type: "auction",
+      link: `/auction/${newAuction.id}`,
+      message: `Your auction has been created successfully, and $${startingPrice} has been deducted from your wallet.`,
+      isRead: false,
+    },
+  });
+  setTimeout(() => completeAuction(newAuction.id), 4 * 60 * 1000);
+  return newAuction;
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
 };
 
 export const completeAuction = async (auctionId: string) => {
@@ -238,11 +325,23 @@ export const completeAuction = async (auctionId: string) => {
       data: { status: "completed", winnerId },
     });
 
+<<<<<<< HEAD
     // Transfer ownership of the post to the winner
     await prisma.post.update({
       where: { id: auction.postId },
       data: { OwnerId: winnerId, isAuctioned: false },
     });
+=======
+    if (winnerId) {
+      await prisma.post.update({
+        where: { id: auction.postId },
+        data: { 
+          OwnerId: winnerId, 
+          isAuctioned: false 
+        },
+      });
+      
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
 
     // Update wallets (admin commission and seller amount)
     await Promise.all([
@@ -397,9 +496,13 @@ export const placeBid = async (
     return { success: true, message: "Bid placed successfully" };
   } catch (error) {
     console.error(error);
+<<<<<<< HEAD
     throw new Error(
       error instanceof Error ? error.message : "Failed to place bid"
     );
+=======
+    throw new Error(error instanceof Error ? error.message : "Failed to place bid");
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
   }
 };
 

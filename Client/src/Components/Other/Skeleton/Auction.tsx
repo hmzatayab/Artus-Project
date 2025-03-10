@@ -8,17 +8,29 @@ export function AuctionCardSkeleton() {
         {/* Auction Time Skeleton */}
         <div className="text-center lg:text-left">
           <Skeleton className="w-40 h-6 mb-2" />
+<<<<<<< HEAD
           <div className="flex space-x-4  mt-1">
+=======
+          <div className="flex space-x-4 text-gray-300 mt-1">
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
             <Skeleton className="w-24 h-4" />
             <Skeleton className="w-24 h-4" />
           </div>
         </div>
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
         {/* Bidders List Skeleton */}
         <div className="flex items-center space-x-2">
           <div className="flex -space-x-3">
             {[...Array(5)].map((_, index) => (
+<<<<<<< HEAD
               <Skeleton key={index} className="w-12 h-12 rounded-full border-2" />
+=======
+              <Skeleton key={index} className="w-12 h-12 rounded-full border-2 border-white" />
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
             ))}
           </div>
           <div>
@@ -26,16 +38,28 @@ export function AuctionCardSkeleton() {
             <Skeleton className="w-20 h-4" />
           </div>
         </div>
+<<<<<<< HEAD
 
         {/* Highest Bidder Skeleton */}
         <div className="flex items-center space-x-3">
           <Skeleton className="w-14 h-14 rounded-full border-2" />
           <div>
+=======
+        
+        {/* Highest Bidder Skeleton */}
+        <div className="flex items-center space-x-3">
+          <Skeleton className="w-14 h-14 rounded-full border-2 border-yellow-400" />
+          <div className="text-white">
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
             <Skeleton className="w-24 h-6 mb-1" />
             <Skeleton className="w-20 h-4" />
           </div>
         </div>
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> f690ea8 (Add Auction Bar with Bid Placement)
         {/* Place Bid Button Skeleton */}
         <Skeleton className="w-32 h-10 rounded-full" />
       </div>
