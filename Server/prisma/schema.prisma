@@ -56,7 +56,7 @@ model User {
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
 
-  posts                 Post[]
+  posts                 Post[]         @relation("UserRelation")
   comments              Comment[]
   replies               Reply[]
   auctions              Auction[]      @relation(name: "AuctionSeller")
@@ -65,8 +65,9 @@ model User {
   receivedNotifications Notification[] @relation(name: "ReceiverNotifications")
   sentNotifications     Notification[] @relation(name: "SenderNotifications")
   Bid                   Bid[]
-  transactionsFrom Transaction[] @relation(name: "FromUserRelation")
-  transactionsTo   Transaction[] @relation(name: "ToUserRelation")
+  transactionsFrom      Transaction[]  @relation(name: "FromUserRelation")
+  transactionsTo        Transaction[]  @relation(name: "ToUserRelation")
+  ownedPosts            Post[]         @relation("OwnerRelation")
 }
 
 model Admin {
@@ -91,6 +92,7 @@ model Admin {
 model Post {
   id                   String   @id @default(auto()) @map("_id") @db.ObjectId
   userId               String   @db.ObjectId
+  OwnerId              String?  @db.ObjectId
   title                String
   description          String
   tags                 String[]
@@ -98,14 +100,16 @@ model Post {
   isLikedByCurrentUser Boolean  @default(false)
   imageURL             String
   Status               String
+  eligibleForAuction   Boolean?
   isLive               Boolean  @default(false)
   isAuctioned          Boolean  @default(false)
   auctionId            String?  @db.ObjectId
-  OwnerId              String?  @db.ObjectId
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Relations with explicit names
+  user     User      @relation("UserRelation", fields: [userId], references: [id], onDelete: Cascade)
+  Owner    User?     @relation("OwnerRelation", fields: [OwnerId], references: [id])
   comments Comment[]
   auction  Auction[]
 }
@@ -160,17 +164,17 @@ model Wallet {
 model Transaction {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   walletId      String   @db.ObjectId
-  type          String   // 'deposit', 'withdraw', 'transfer'
+  type          String // 'deposit', 'withdraw', 'transfer'
   amount        Float
-  transactionId String   @unique 
-  invoiceId     String   @unique 
+  transactionId String   @unique
+  invoiceId     String   @unique
   fromUserId    String?  @db.ObjectId
   toUserId      String?  @db.ObjectId
-  status        String   // 'success', 'failed', 'pending'
+  status        String // 'success', 'failed', 'pending'
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  wallet   Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
 
   fromUser User? @relation(name: "FromUserRelation", fields: [fromUserId], references: [id], onDelete: SetNull)
   toUser   User? @relation(name: "ToUserRelation", fields: [toUserId], references: [id], onDelete: SetNull)
@@ -180,20 +184,19 @@ model Notification {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   receiverId String   @db.ObjectId
   senderId   String?  @db.ObjectId // 👈 Nullable senderId
-  type       String   // message, follow, like, comment, etc.
+  type       String // message, follow, like, comment, etc.
   message    String
   link       String?
   isRead     Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  receiver User @relation(name: "ReceiverNotifications", fields: [receiverId], references: [id])
+  receiver User  @relation(name: "ReceiverNotifications", fields: [receiverId], references: [id])
   sender   User? @relation(name: "SenderNotifications", fields: [senderId], references: [id]) // 👈 Nullable sender
 
   @@index([receiverId])
   @@index([senderId])
 }
-
 
 model Auction {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId

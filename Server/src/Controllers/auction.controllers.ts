@@ -1,10 +1,11 @@
 import prisma from "../config/DB";
 import { Request, Response } from "express";
 import * as Auction from "../Services/auction.services";
+import { AppError } from "../Types/Error";
 
 export const createAuctionController = async (req: Request, res: Response) => {
   try {
-    const { post, startingPrice } = req.body;
+    const { post, startingPrice, auctionDays } = req.body;
     const sellerId = (req as any).user?.userId;
 
     if (!sellerId) {
@@ -12,14 +13,20 @@ export const createAuctionController = async (req: Request, res: Response) => {
       return;
     }
 
-    const auction = await Auction.createAuction(post, startingPrice, sellerId);
+    const auction = await Auction.createAuction(
+      post,
+      startingPrice,
+      sellerId,
+      auctionDays
+    );
 
     res.status(201).json({
       message: "Auction created successfully, and amount deducted from wallet",
       auction,
     });
   } catch (error) {
-    res.status(500).json({ message: error });
+    const err = error as AppError
+    res.status(500).json({ message: err.message, susscces: false });
   }
 };
 
@@ -80,11 +87,13 @@ export const getAuctionDetails = async (req: Request, res: Response) => {
     const auction = await prisma.auction.findUnique({
       where: { id: auctionId },
       include: {
-        seller: { select: { id: true, name: true, email: true } },
-        highestBidder: { select: { id: true, name: true, email: true } },
-        winner: { select: { id: true, name: true, email: true } },
+        seller: { select: { id: true, name: true, email: true, identityVerified: true, username: true } },
+        highestBidder: {
+          select: { id: true, name: true, email: true, image: true, identityVerified: true, username: true },
+        },
+        winner: { select: { id: true, name: true, email: true, identityVerified: true, username: true } },
         bids: {
-          include: { user: { select: { id: true, name: true, image: true } } },
+          include: { user: { select: { id: true, name: true, image: true, identityVerified: true, username: true } } },
         },
         post: {
           select: { id: true, title: true, description: true, imageURL: true },
@@ -107,9 +116,10 @@ export const getAuctionDetails = async (req: Request, res: Response) => {
 export const endAuction = async (req: Request, res: Response) => {
   try {
     const { auctionId } = req.params;
+    const { postId } = req.body;
     const userId = (req as any).user?.userId;
 
-    const auction = await Auction.endAuction(auctionId, userId);
+    const auction = await Auction.endAuction(auctionId, userId, postId);
 
     res.status(200).json({
       success: true,

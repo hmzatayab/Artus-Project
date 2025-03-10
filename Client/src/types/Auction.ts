@@ -17,18 +17,24 @@ export interface AuctionResponse {
       id: string;
       name: string;
       email: string;
+      isidentityVerified: boolean;
+      username: string;
     };
     highestBidder: null | {
       id: string;
       name: string;
       email: string;
       image: string;
+      isidentityVerified: boolean;
+      username: string;
     };
     winner: null | {
       id: string;
       name: string;
       email: string;
       image: string;
+      isidentityVerified: boolean;
+      username: string;
     };
     bids: Array<{
       id: string;
@@ -38,6 +44,8 @@ export interface AuctionResponse {
         id: string;
         name: string;
         image: string;
+        isidentityVerified: boolean;
+        username: string;
       };
     }>;
     post: {

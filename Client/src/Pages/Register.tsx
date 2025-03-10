@@ -2,12 +2,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner"
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/Components/ui/input";
+import { Button } from "@/Components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Label } from "@/Components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/Components/ui/form";
 import { useState } from "react";
 import { useUser } from "../Context/UserContext";
 import { registerUser } from "../APIs/User";

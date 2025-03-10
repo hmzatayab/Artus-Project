@@ -259,7 +259,7 @@ export default function PostPage() {
                     </div>
                 </div>
             )}
-            <div>{post?.isAuctioned && <AuctionBar post={post} token={token} />}</div>
+            <div><AuctionBar post={post} token={token} /></div>
             <div>
                 <div className="mt-10">
                     <div className="relative mb-8 flex flex-col items-center text-center">

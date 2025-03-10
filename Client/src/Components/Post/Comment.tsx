@@ -1,12 +1,10 @@
-"use client";
-
 import { useState, useEffect } from "react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/Components/ui/avatar";
+import { Input } from "@/Components/ui/input";
+import { Button } from "@/Components/ui/button";
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/Components/ui/card";
 import { SendHorizonal, ChevronDown, ChevronUp } from "lucide-react";
 import { RiHeartFill, RiHeartLine, RiVerifiedBadgeFill } from "@remixicon/react";
 import { getPostComments, createComment, createReply, likeComment, likeCommentReply } from "@/APIs/Post";
@@ -18,7 +16,7 @@ import { CommentSkeleton } from "../Other/Skeleton/Comment";
 const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
     const [comments, setComments] = useState<Comment[]>([]);
     const [comment, setComment] = useState("");
-    const [replyingTo, setReplyingTo] = useState<{ username: string; commentId: string } | null>(null); 
+    const [replyingTo, setReplyingTo] = useState<{ username: string; commentId: string } | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
     const [loading, setLoading] = useState(false);
@@ -47,20 +45,20 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
         if (!comment.trim() || !postId) return;
 
         // Validation: Comment max 200 characters hona chahiye
-    if (comment.length > 200) {
-        toast("Comment cannot exceed 200 characters.");
-        return;
-    }
+        if (comment.length > 200) {
+            toast("Comment cannot exceed 200 characters.");
+            return;
+        }
 
-    // Validation: Sirf '@' allowed, baki special characters block
-    const specialCharRegex = /[^a-zA-Z0-9\s@\p{Emoji}]/u;
-    if (specialCharRegex.test(comment)) {
-        toast("Only '@' is allowed in comments. No other special characters.");
-        return;
-    }
+        // Validation: Sirf '@' allowed, baki special characters block
+        const specialCharRegex = /[^a-zA-Z0-9\s@\p{Emoji}]/u;
+        if (specialCharRegex.test(comment)) {
+            toast("Only '@' is allowed in comments. No other special characters.");
+            return;
+        }
 
         try {
-            const token = data?.token; 
+            const token = data?.token;
             if (!token) {
                 toast("You need to login first", {
                     action: {
@@ -76,7 +74,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
             const updatedComment: Comment = {
                 ...(newComment.comment as Comment),
                 user: {
-                    name: data.user.name, 
+                    name: data.user.name,
                     image: data.user.image,
                 },
             };
@@ -265,7 +263,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
                                 <AvatarFallback>
                                     {comment.user.name
                                         .split(" ")
-                                        .map((word: string) => word[0]) 
+                                        .map((word: string) => word[0])
                                         .join("")
                                         .toUpperCase()}
                                 </AvatarFallback>
@@ -327,7 +325,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
                                     <div className="mt-4 lg:pl-10 lg:border-l dark:border-gray-700 border-gray-300">
                                         {(expandedComments[comment.id]
                                             ? comment.replies
-                                            : comment.replies.slice(0, 3) 
+                                            : comment.replies.slice(0, 3)
                                         ).map((reply) => (
                                             <div key={reply.id} className="flex items-start gap-4 mt-4">
                                                 <Avatar className="w-8 h-8 border-2 cursor-pointer">
@@ -383,17 +381,17 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
                                                             {data?.user?.id && reply?.likes?.includes(data.user.id) ? (
                                                                 <RiHeartFill className="w-4 h-4 text-red-500" />
                                                             ) : (
-                                                                <RiHeartLine className="w-4 h-4 dark:text-gray-400 text-gray-600" /> 
+                                                                <RiHeartLine className="w-4 h-4 dark:text-gray-400 text-gray-600" />
                                                             )}
                                                             <span className={data?.user?.id && reply?.likes?.includes(data.user.id) ? "text-red-500" : "text-gray-400"}>
-                                                                {reply.likes.length} 
+                                                                {reply.likes.length}
                                                             </span>
                                                         </button>
 
                                                         {/* Reply Button for Nested Replies */}
                                                         <div className="flex items-center gap-4 mt-2">
                                                             <button
-                                                                onClick={() => handleReplyClick(reply.user.name, comment.id)} 
+                                                                onClick={() => handleReplyClick(reply.user.name, comment.id)}
                                                                 className="text-sm text-gray-400 hover:text-gray-200 transition-colors cursor-pointer"
                                                             >
                                                                 Reply
@@ -440,7 +438,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
                             <AvatarFallback>
                                 {data?.user.name
                                     .split(" ")
-                                    .map((word: string) => word[0]) 
+                                    .map((word: string) => word[0])
                                     .join("")
                                     .toUpperCase()}
                             </AvatarFallback>
@@ -458,7 +456,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ postId }) => {
                         <Button
                             variant="ghost"
                             size="icon"
-                            onClick={replyingTo ? handleReplySubmit : handleCommentSubmit} 
+                            onClick={replyingTo ? handleReplySubmit : handleCommentSubmit}
                         >
                             {loading ? (
                                 <svg

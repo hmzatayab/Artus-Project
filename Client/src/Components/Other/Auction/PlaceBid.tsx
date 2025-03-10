@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Minus, Plus, CheckCircle, CalendarIcon } from "lucide-react";
+import { CheckCircle, CalendarIcon } from "lucide-react";
 import { Button } from "@/Components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/Components/ui/drawer";
 import { toast } from "sonner";
@@ -7,7 +7,7 @@ import LoadingIcon from "@/utils/Loading";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { placeBid } from "@/APIs/Auction"; // Assuming you have an API to place bids
 import { AuctionResponse } from "@/Types/Auction";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { RiQuestionFill } from "@remixicon/react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/Components/ui/hover-card";
 
@@ -22,6 +22,7 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
     const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
 
+    const Navigate = useNavigate();
     const minBidAmount = auction.highestBid ? auction.highestBid + 1 : auction.startingPrice;
 
     function onClick(adjustment: number) {
@@ -48,6 +49,15 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
             toast.error(`Bid amount must be at least $${minBidAmount}`);
             return;
         }
+        if (!token) {
+            toast("You need to login first", {
+                action: {
+                    label: "Login",
+                    onClick: () => Navigate("/login"),
+                },
+            });
+            return;
+        }
         setIsConfirmDialogOpen(true);
     };
 
@@ -55,9 +65,18 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
         <>
             <Drawer>
                 <DrawerTrigger asChild>
-                    <Button variant={"outline"} className="px-7 py-6 cursor-pointer bg-black transition-transform transform hover:scale-105">
-                        Place Bid
-                    </Button>
+                    {auction.status === "active" ? (
+                        <Button
+                            variant={"outline"}
+                            className="px-7 py-6 cursor-pointer bg-black transition-transform transform hover:scale-105"
+                        >
+                            Place Bid
+                        </Button>
+                    ) : (
+                        <div className="text-gray-500 text-lg font-semibold">
+                            Auction Ended
+                        </div>
+                    )}
                 </DrawerTrigger>
                 <DrawerContent>
                     <div className="mx-auto w-full max-w-sm text-center">
@@ -71,10 +90,21 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
                                     variant="outline"
                                     size="icon"
                                     className="h-10 w-10 rounded-full"
+                                    onClick={() => onClick(-10)}
+                                    disabled={amount <= minBidAmount}
+                                >
+                                    {/* <Minus /> */}
+                                    <span>-10</span>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-10 w-10 rounded-full"
                                     onClick={() => onClick(-1)}
                                     disabled={amount <= minBidAmount}
                                 >
-                                    <Minus />
+                                    {/* <Minus /> */}
+                                    <span>-1</span>
                                 </Button>
                                 <div className="text-6xl font-bold tracking-tighter">${amount}</div>
                                 <Button
@@ -83,7 +113,17 @@ export function PlaceBidDrawer({ auction, token }: PlaceBidDrawerProps) {
                                     className="h-10 w-10 rounded-full"
                                     onClick={() => onClick(1)}
                                 >
-                                    <Plus />
+                                    {/* <Plus /> */}
+                                    <span>+1</span>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-10 w-10 rounded-full"
+                                    onClick={() => onClick(10)}
+                                >
+                                    {/* <Plus /> */}
+                                    <span>+10</span>
                                 </Button>
                             </div>
                             <p className="text-sm text-gray-500 mt-2">

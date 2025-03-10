@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "@/Components/ui/card"
 import { Link } from "react-router-dom"
 import { RiBookmarkFill, RiLayoutGridFill, RiLineChartLine, RiTrophyFill, RiVerifiedBadgeFill } from "@remixicon/react";
 import { Separator } from "@/Components/ui/separator";
@@ -8,11 +8,11 @@ import { toast } from "sonner"
 import { getUserPosts } from "@/APIs/Post";
 import { getUser } from "@/utils/Storage";
 import { PostCardSkeleton } from "@/Components/Other/Skeleton/PostCard";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/Components/ui/hover-card";
 import { AlertTriangle, CalendarIcon } from "lucide-react";
 import { ChartComponent } from "@/Components/Other/Analytics/ChartForViews"
 import UserUpdateDialog from "@/Components/Other/User/UserUpdateDialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import { getTransactions, getWallet } from "@/APIs/Wallet";
 import { TransactionsResponse, Wallet } from "@/Types/Wallet";
 import { AppError } from "@/Types/error";
@@ -303,8 +303,25 @@ function Profile() {
             </div>
 
           ) : selectedTab === "Auctions" ? (
-            <div>
-              <div className="lg:mx-8 mt-4 mb-8">Auctions Posts</div>
+            <div className="lg:mx-8 lg:mt-4 mb-8 p-5 lg:p-0">
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <PostCardSkeleton />
+                  <PostCardSkeleton />
+                  <PostCardSkeleton />
+                  <PostCardSkeleton />
+                </div>
+              ) : posts.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {posts.map((post, index) => (
+                    <PostCard key={index} post={post} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-400 text-xl font-semibold mt-10">
+                  No Posts Found.
+                </div>
+              )}
             </div>
           ) : selectedTab === "Wishlist" ? (
             <div>

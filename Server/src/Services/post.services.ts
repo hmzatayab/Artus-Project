@@ -13,6 +13,7 @@ export const createPost = async (postData: { userId: string; title: string; desc
         tags,
         imageURL,
         Status: "pending",
+        eligibleForAuction: false
       },
     });
     return newPost;
@@ -190,7 +191,7 @@ export const likePost = async (postId: string, userId: string) => {
       isRead: false,
     },
   });
-
+  await Redis.del(`post:${postId}`);
   return updatedPost;
 };
 

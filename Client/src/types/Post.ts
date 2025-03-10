@@ -9,6 +9,8 @@ export type Post = {
   updatedAt: string;
   auctionId?: string;
   isAuctioned: boolean;
+  eligibleForAuction: boolean;
+  Owner: string;
   user: {
     id: string;
     name: string;

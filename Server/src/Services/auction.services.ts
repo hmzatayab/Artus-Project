@@ -1,105 +1,175 @@
 import Redis from "../config/redis";
+import cron from "node-cron";
 import prisma from "../config/DB";
 import { generateInvoiceId, generateTransactionId } from "../utils/generateId";
+import { AppError } from "../Types/Error";
+
+// Schedule a cron job to check for expired auctions every hour
+cron.schedule("*/5 * * * *", async () => {
+  try {
+    console.log("Checking for expired auctions and eligible posts...");
+
+    // 1. Check for expired auctions
+    const expiredAuctions = await prisma.auction.findMany({
+      where: {
+        status: "active",
+        endTime: { lte: new Date() },
+      },
+      select: { id: true },
+    });
+
+    if (expiredAuctions.length > 0) {
+      await Promise.all(
+        expiredAuctions.map((auction) => completeAuction(auction.id))
+      );
+
+      await prisma.auction.updateMany({
+        where: { id: { in: expiredAuctions.map((auction) => auction.id) } },
+        data: { status: "completed" },
+      });
+
+      console.log(`${expiredAuctions.length} auctions completed.`);
+    }
+
+    // 2. Check for posts eligible for auction
+    const posts = await prisma.post.findMany({
+      where: {
+        eligibleForAuction: false, // Only check posts that are not already eligible
+        isAuctioned: false, // Only check posts that are not already auctioned
+      },
+      include: {
+        comments: true,
+      },
+    });
+
+    const eligiblePosts = posts.filter((post) => {
+      const likesCount = post.likes.length;
+      const commentsCount = post.comments.length;
+      return likesCount >= 1 && commentsCount >= 1; // Eligibility criteria
+    });
+
+    if (eligiblePosts.length > 0) {
+      await prisma.post.updateMany({
+        where: { id: { in: eligiblePosts.map((post) => post.id) } },
+        data: { eligibleForAuction: true },
+      });
+
+      console.log(
+        `${eligiblePosts.length} posts marked as eligible for auction.`
+      );
+    }
+  } catch (error) {
+    const err = error as AppError;
+    console.error(`Error in cron job: ${err.message}`);
+  }
+});
 
 export const createAuction = async (
   postId: string,
   startingPrice: number,
-  sellerId: string
+  sellerId: string,
+  auctionDays: number
 ) => {
-  await Redis.del(`post:${postId}`);
-  const existingPost = await prisma.post.findUnique({
-    where: { id: postId },
-    include: { user: true },
-  });
+  try {
+    await Redis.del(`post:${postId}`);
+    const existingPost = await prisma.post.findUnique({
+      where: { id: postId },
+      include: { user: true },
+    });
 
-  if (!existingPost || existingPost.userId !== sellerId) {
-    throw new Error("You can only create an auction for your own post");
+    if (!existingPost || existingPost.userId !== sellerId) {
+      throw new Error("You can only create an auction for your own post");
+    }
+
+    const commentsCount = await prisma.comment.count({ where: { postId } });
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { likes: true },
+    });
+    const likesCount = post?.likes.length || 0;
+
+    if (likesCount < 0 || commentsCount < 0) {
+      throw new Error(
+        "You need at least 5 likes and 1 comment to start an auction"
+      );
+    }
+
+    const wallet = await prisma.wallet.findUnique({
+      where: { userId: sellerId },
+    });
+
+    if (!wallet || !wallet.isActive) {
+      throw new Error("Wallet is inactive. Cannot start auction.");
+    }
+
+    if (wallet.balance < startingPrice) {
+      throw new Error("Insufficient balance to start auction.");
+    }
+
+    const updatedWallet = await prisma.wallet.update({
+      where: { userId: sellerId },
+      data: { balance: { decrement: startingPrice } },
+    });
+
+    await prisma.transaction.create({
+      data: {
+        walletId: updatedWallet.id,
+        amount: startingPrice,
+        type: "Create Auction",
+        status: "completed",
+        transactionId: generateTransactionId(),
+        invoiceId: generateInvoiceId(),
+      },
+    });
+
+    const endTime = new Date();
+    endTime.setDate(endTime.getDate() + auctionDays);
+
+    const newAuction = await prisma.auction.create({
+      data: {
+        postId,
+        sellerId,
+        startingPrice,
+        status: "active",
+        endTime,
+      },
+    });
+
+    await prisma.post.update({
+      where: { id: postId },
+      data: { isAuctioned: true, auctionId: newAuction.id, OwnerId: null },
+    });
+
+    await prisma.notification.create({
+      data: {
+        receiverId: sellerId,
+        senderId: sellerId,
+        type: "auction",
+        link: `/auction/${newAuction.id}`,
+        message: `Your auction has been created successfully, and $${startingPrice} has been deducted from your wallet.`,
+        isRead: false,
+      },
+    });
+    return newAuction;
+  } catch (error) {
+    const err = error as AppError;
+    throw new Error(`Failed to create auction: ${err.message}`);
   }
-
-  const commentsCount = await prisma.comment.count({ where: { postId } });
-
-  const post = await prisma.post.findUnique({
-    where: { id: postId },
-    select: { likes: true },
-  });
-  const likesCount = post?.likes.length || 0;
-
-  if (likesCount < 0 || commentsCount < 0) {
-    throw new Error(
-      "You need at least 5 likes and 1 comment to start an auction"
-    );
-  }
-
-  const wallet = await prisma.wallet.findUnique({
-    where: { userId: sellerId },
-  });
-
-  if (!wallet || !wallet.isActive) {
-    throw new Error("Wallet is inactive. Cannot start auction.");
-  }
-
-  if (wallet.balance < startingPrice) {
-    throw new Error("Insufficient balance to start auction.");
-  }
-
-  const updatedWallet = await prisma.wallet.update({
-    where: { userId: sellerId },
-    data: { balance: { decrement: startingPrice } },
-  });
-
-  await prisma.transaction.create({
-    data: {
-      walletId: updatedWallet.id,
-      amount: startingPrice,
-      type: "First Bid",
-      status: "completed",
-      transactionId: generateTransactionId(),
-      invoiceId: generateInvoiceId(),
-    },
-  });
-
-  const endTime = new Date();
-  endTime.setHours(endTime.getHours() + 2);
-
-  const newAuction = await prisma.auction.create({
-    data: {
-      postId,
-      sellerId,
-      startingPrice,
-      status: "active",
-      endTime,
-    },
-  });
-
-  await prisma.post.update({
-    where: { id: postId },
-    data: { isAuctioned: true, auctionId: newAuction.id, OwnerId: null },
-  });
-
-  await prisma.notification.create({
-    data: {
-      receiverId: sellerId,
-      senderId: sellerId,
-      type: "auction",
-      link: `/auction/${newAuction.id}`,
-      message: `Your auction has been created successfully, and $${startingPrice} has been deducted from your wallet.`,
-      isRead: false,
-    },
-  });
-  setTimeout(() => completeAuction(newAuction.id), 4 * 60 * 1000);
-  return newAuction;
 };
 
 export const completeAuction = async (auctionId: string) => {
   try {
-    const admin = await prisma.admin.findFirst({
-      where: { role: "Admin" },
-    });
+    const admin = await prisma.admin.findFirst({ where: { role: "Admin" } });
 
+    // Fetch the auction with the highest bid
     const auction = await prisma.auction.findUnique({
       where: { id: auctionId },
-      include: { bids: { orderBy: { amount: "desc" } } }, // Highest bid first
+      include: {
+        bids: { orderBy: { amount: "desc" } },
+        post: true,
+        seller: true,
+      },
     });
 
     if (!auction || auction.status !== "active") {
@@ -107,80 +177,125 @@ export const completeAuction = async (auctionId: string) => {
       return;
     }
 
-    const highestBid = auction.bids.length > 0 ? auction.bids[0] : null;
-    const winnerId = highestBid ? highestBid.userId : null;
-    const totalAmount = highestBid ? highestBid.amount : 0;
+    const highestBid = auction.bids[0] || null;
+    const winnerId = highestBid?.userId ?? "";
+    const totalAmount = highestBid?.amount || 0;
 
+    // If no bids, mark the auction as completed without a winner
     if (!highestBid) {
       console.log(`Auction ${auctionId} ended with no bids.`);
       await prisma.auction.update({
         where: { id: auctionId },
         data: { status: "completed", winnerId: null },
       });
+      await prisma.post.update({
+        where: { id: auction.postId },
+        data: { OwnerId: null, isAuctioned: false },
+      });
       return;
     }
 
-    // 💰 Calculate Commission (5%) and Seller Amount (95%)
+    // Calculate commission (5%) and seller amount (95%)
     const commission = totalAmount * 0.05;
     const sellerAmount = totalAmount - commission;
 
+    const totalBidsCount = auction.bids.length;
+    const giftAmountPerBid = 1;
+    const totalGiftAmount = totalBidsCount * giftAmountPerBid;
+
+    await prisma.wallet.update({
+      where: { userId: winnerId },
+      data: { balance: { increment: totalGiftAmount } },
+    });
+
+    // Create a transaction record for the gift amount
+    await prisma.transaction.create({
+      data: {
+        walletId: winnerId,
+        amount: totalGiftAmount,
+        type: "Gift",
+        status: "completed",
+        transactionId: generateTransactionId(),
+        invoiceId: generateInvoiceId(),
+      },
+    });
+
+    // Notify the winner about the gift
+    await prisma.notification.create({
+      data: {
+        receiverId: winnerId,
+        senderId: admin?.id ?? "",
+        type: "auction",
+        link: `/auction/${auction.id}`,
+        message: `Congratulations! You won the auction for post "${auction.post.title}". You received a gift of $${totalGiftAmount} for ${totalBidsCount} bids.`,
+        isRead: false,
+      },
+    });
+
+    // Update auction status and winner
     await prisma.auction.update({
       where: { id: auctionId },
       data: { status: "completed", winnerId },
     });
 
-    if (winnerId) {
-      await prisma.post.update({
-        where: { id: auction.postId },
-        data: { 
-          OwnerId: winnerId, 
-          isAuctioned: false 
-        },
-      });
-      
+    // Transfer ownership of the post to the winner
+    await prisma.post.update({
+      where: { id: auction.postId },
+      data: { OwnerId: winnerId, isAuctioned: false },
+    });
 
-      await prisma.wallet.update({
-        where: { userId: admin?.id }, // Replace with actual admin wallet ID
+    // Update wallets (admin commission and seller amount)
+    await Promise.all([
+      prisma.wallet.update({
+        where: { userId: admin?.id },
         data: { balance: { increment: commission } },
-      });
-
-      await prisma.wallet.update({
+      }),
+      prisma.wallet.update({
         where: { userId: auction.sellerId },
         data: { balance: { increment: sellerAmount } },
-      });
+      }),
+    ]);
 
+    // Notify the winner
+    if (winnerId) {
       await prisma.notification.create({
         data: {
           receiverId: winnerId,
           senderId: admin?.id ?? "",
           type: "auction",
           link: `/auction/${auction.id}`,
-          message: `Congratulations! You won the auction for post ${auction.postId}. Check your profile.`,
+          message: `Congratulations! You won the auction for post "${auction.post.title}". Check your profile.`,
           isRead: false,
         },
       });
     }
 
-    for (const bid of auction.bids) {
-      await prisma.notification.create({
-        data: {
-          receiverId: bid.userId,
-          senderId: auction.sellerId,
-          type: "auction",
-          link: `/auction/${auction.id}`,
-          message: `The auction has ended. The winner is ${
-            winnerId ? "User " + winnerId : "No one"
-          }.`,
-          isRead: false,
-        },
-      });
-    }
+    // Notify all bidders about the auction result
+    await Promise.all(
+      auction.bids.map((bid) =>
+        prisma.notification.create({
+          data: {
+            receiverId: bid.userId,
+            senderId: auction.sellerId,
+            type: "auction",
+            link: `/auction/${auction.id}`,
+            message: `The auction for post "${
+              auction.post.title
+            }" has ended. The winner is ${
+              winnerId ? "User " + winnerId : "No one"
+            }.`,
+            isRead: false,
+          },
+        })
+      )
+    );
 
     console.log(
       `Auction ${auctionId} completed. Winner: ${winnerId || "No one"}`
     );
   } catch (error) {
-    console.error("Failed to complete auction:", error);
+    console.error(`Failed to complete auction ${auctionId}:`, error);
+    throw error;
   }
 };
 
@@ -239,7 +354,7 @@ export const placeBid = async (
       data: {
         walletId: wallet.id,
         amount: bidAmount,
-        type: "bid",
+        type: "Bid",
         status: "completed",
         transactionId: generateTransactionId(),
         invoiceId: generateInvoiceId(),
@@ -251,7 +366,7 @@ export const placeBid = async (
       data: {
         walletId: wallet.id,
         amount: 1,
-        type: "bid_fee",
+        type: "Bid Fee",
         status: "completed",
         transactionId: generateTransactionId(),
         invoiceId: generateInvoiceId(),
@@ -282,11 +397,17 @@ export const placeBid = async (
     return { success: true, message: "Bid placed successfully" };
   } catch (error) {
     console.error(error);
-    throw new Error(error instanceof Error ? error.message : "Failed to place bid");
+    throw new Error(
+      error instanceof Error ? error.message : "Failed to place bid"
+    );
   }
 };
 
-export const endAuction = async (auctionId: string, userId: string) => {
+export const endAuction = async (
+  auctionId: string,
+  userId: string,
+  postId: string
+) => {
   // Check if auction exists
   const auction = await prisma.auction.findUnique({
     where: { id: auctionId },
@@ -318,6 +439,11 @@ export const endAuction = async (auctionId: string, userId: string) => {
     await prisma.wallet.update({
       where: { userId: auction.sellerId }, // Auction creator's wallet
       data: { balance: { decrement: bonusAmount } },
+    });
+
+    await prisma.post.update({
+      where: { id: postId },
+      data: { isAuctioned: false, OwnerId: null },
     });
 
     // ✅ Update highest bidder's wallet (after Artus commission)
